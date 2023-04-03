@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EWallet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230331222942_IdentityTables")]
+    [Migration("20230403073237_IdentityTables")]
     partial class IdentityTables
     {
         /// <inheritdoc />
@@ -35,9 +35,6 @@ namespace EWallet.Migrations
 
                     b.Property<decimal>("CurrentBalance")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

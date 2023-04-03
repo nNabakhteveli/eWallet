@@ -30,13 +30,15 @@ namespace EWallet.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<UserEntity> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IWalletRepository _walletRepository;
 
         public RegisterModel(
             UserManager<UserEntity> userManager,
             IUserStore<UserEntity> userStore,
             SignInManager<UserEntity> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IWalletRepository walletRepository)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +46,7 @@ namespace EWallet.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _walletRepository = walletRepository;
         }
 
         /// <summary>
@@ -115,6 +118,12 @@ namespace EWallet.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
+                
+                var newWallet = new WalletEntity() { CurrentBalance = 0};
+
+                var walletWithNewId = await _walletRepository.CreateWallet(newWallet);
+                
+                user.WalletId = walletWithNewId.Id;
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
                 var result = await _userManager.CreateAsync(user, Input.Password);

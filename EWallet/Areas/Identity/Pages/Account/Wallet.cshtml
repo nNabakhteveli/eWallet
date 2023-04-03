@@ -1,0 +1,33 @@
+@page
+@inject UserManager<UserEntity> UserManager
+@inject SignInManager<UserEntity> SignInManager
+@inject IWalletRepository walletRepository
+@model EWallet.Areas.Identity.Pages.Account.Wallet
+
+@{
+    Layout = "_Layout";
+
+    var user = await UserManager.GetUserAsync(User);
+    var wallet = walletRepository.GetWalletById(user.WalletId);
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+<div>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <h1>@UserManager.GetUserName(User)</h1>
+        <p>Current balance: @wallet.CurrentBalance</p>
+    }
+    else
+    {
+        <h1>sad</h1>
+    }
+</div>
+</body>
+</html>
