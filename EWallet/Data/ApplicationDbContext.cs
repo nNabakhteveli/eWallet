@@ -11,4 +11,5 @@ public class ApplicationDbContext : IdentityDbContext
 
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<WalletEntity> Wallets { get; set; }
+    public DbSet<TransactionEntity> Transactions { get; set; }
 }

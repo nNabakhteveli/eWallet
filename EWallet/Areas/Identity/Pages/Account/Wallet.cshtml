@@ -2,7 +2,8 @@
 @inject UserManager<UserEntity> UserManager
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
-@model EWallet.Areas.Identity.Pages.Account.Wallet
+@* @model EWallet.Areas.Identity.Pages.Account.Wallet *@
+@model EWallet.Models.TransactionEntity
 
 @{
     Layout = "_Layout";
@@ -22,11 +23,42 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <h1>@UserManager.GetUserName(User)</h1>
+        <h5>(User id: @UserManager.GetUserId(User))</h5>
         <p>Current balance: @wallet.CurrentBalance</p>
+
+        <ul class="nav nav-pills nav-fill">
+            <li class="nav-item">
+                <a class="nav-link active" href="/Identity/Account/" aria-current="page">Deposit</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/Identity/Account/Withdraw">Withdraw</a>
+            </li>
+        </ul>
+
+        <form class="w-75" method="POST" asp-controller="MoneyTransfer" asp-action="Deposit">
+            <div class="mb-3 mt-4">
+                <label asp-for="RecipientId" class="form-label">Recipient ID</label>
+                <input type="text" asp-for="RecipientId" class="form-control" id="exampleInputRecipient" placeholder="Enter an ID of the recipient">
+            </div>
+            <div class="mb-3 mt-4">
+                <label asp-for="Amount" class="form-label">Amount of money to deposit</label>
+                <input type="number" asp-for="Amount" class="form-control" id="exampleInputAmount" placeholder="Enter amount of money to deposit">
+            </div>
+
+            <select class="custom-select mb-3" asp-for="Currency">
+                <option value="USD" selected>USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GEL">GEL</option>
+            </select>
+            
+            <input asp-for="UserId" value="@UserManager.GetUserId(User)" class="invisible" />
+            <br/>
+            <button type="submit" class="btn btn-primary">Deposit</button>
+        </form>
     }
     else
     {
-        <h1>sad</h1>
+        @Redirect("/")
     }
 </div>
 </body>

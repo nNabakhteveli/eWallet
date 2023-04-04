@@ -4,6 +4,7 @@ public interface IWalletRepository
 {
     Task<WalletEntity> CreateWallet(WalletEntity wallet);
     WalletEntity GetWalletById(int id);
-    WalletEntity UpdateWallet(WalletEntity wallet);
+    Task<WalletEntity> GetWalletByUserIdAsync(string id);
+    Task<WalletEntity> UpdateWalletAsync(WalletEntity wallet);
     void DeleteWallet(int id);
 }

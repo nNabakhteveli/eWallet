@@ -33,10 +33,23 @@ public class WalletRepository : IWalletRepository
     {
         return db.Query<WalletEntity>("SELECT Id, CurrentBalance FROM Wallets WHERE Id = @Id", new { id }).SingleOrDefault();
     }
-
-    public WalletEntity UpdateWallet(WalletEntity wallet)
+    
+    public async Task<WalletEntity> GetWalletByUserIdAsync(string id)
     {
-        throw new NotImplementedException();
+        return (await db.QueryAsync<WalletEntity>("SELECT Id, UserId, CurrentBalance FROM Wallets WHERE UserId = @Id", new { id })).SingleOrDefault();
+    }
+
+    public async Task<WalletEntity> UpdateWalletAsync(WalletEntity wallet)
+    {
+        var sql =
+            "UPDATE Wallets " +
+            "SET UserId = @UserId, " +
+            "CurrentBalance = @CurrentBalance " +
+            "WHERE Id = @Id";
+
+        await db.ExecuteAsync(sql, wallet);
+
+        return wallet;
     }
 
     public void DeleteWallet(int id)

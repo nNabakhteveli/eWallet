@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
