@@ -85,4 +85,8 @@
       <Folder Include="Migrations" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Remove="Areas\Identity\Pages\Account\InvalidRequest.cshtml" />
+    </ItemGroup>
+
 </Project>

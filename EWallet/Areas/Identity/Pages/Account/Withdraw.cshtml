@@ -2,7 +2,8 @@
 @inject UserManager<UserEntity> UserManager
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
-@model EWallet.Areas.Identity.Pages.Account.Withdraw
+@model EWallet.Models.TransactionEntity
+
 
 @{
     Layout = "_Layout";
@@ -22,6 +23,7 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <h1>@UserManager.GetUserName(User)</h1>
+        <h5>(User id: @UserManager.GetUserId(User))</h5>
         <p>Current balance: @wallet.CurrentBalance</p>
 
         <ul class="nav nav-pills nav-fill">
@@ -33,21 +35,21 @@
             </li>
         </ul>
 
-        <form>
-            <div class="mb-3">
-                <label for="exampleInputEmail1" class="form-label">Email address</label>
-                <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-                <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        <form class="w-75" method="POST" asp-controller="MoneyTransfer" asp-action="Withdraw">
+            <div class="mb-3 mt-4">
+                <label asp-for="Amount" class="form-label">Amount of money to withdraw</label>
+                <input type="number" asp-for="Amount" class="form-control" id="exampleInputAmount" placeholder="Enter amount of money to withdraw">
             </div>
-            <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Password</label>
-                <input type="password" class="form-control" id="exampleInputPassword1">
-            </div>
-            <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                <label class="form-check-label" for="exampleCheck1">Check me out</label>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+
+            <select class="custom-select mb-3" asp-for="Currency">
+                <option value="USD" selected>USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GEL">GEL</option>
+            </select>
+
+            <input asp-for="UserId" value="@UserManager.GetUserId(User)" class="invisible"/>
+            <br/>
+            <button type="submit" class="btn btn-primary">Withdraw</button>
         </form>
     }
     else
