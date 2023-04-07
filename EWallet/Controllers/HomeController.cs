@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 using EWallet.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EWallet.Controllers;
 

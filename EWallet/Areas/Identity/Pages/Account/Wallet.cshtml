@@ -3,7 +3,9 @@
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
 @* @model EWallet.Areas.Identity.Pages.Account.Wallet *@
-@model EWallet.Models.TransactionEntity
+@using EWallet.Data
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model EWallet.Domain.Models.TransactionEntity
 
 @{
     Layout = "_Layout";

@@ -2,7 +2,9 @@
 @inject UserManager<UserEntity> UserManager
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
-@model EWallet.Models.TransactionEntity
+@using EWallet.Data
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model EWallet.Domain.Models.TransactionEntity
 
 
 @{

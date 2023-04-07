@@ -8,7 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Dapper" Version="2.0.123" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.14" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.15" />
       <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.15" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.4" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.15" />
@@ -82,11 +82,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Migrations" />
+      <Content Remove="Areas\Identity\Pages\Account\InvalidRequest.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
-      <Content Remove="Areas\Identity\Pages\Account\InvalidRequest.cshtml" />
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+      <ProjectReference Include="..\EBank\EBank.csproj" />
     </ItemGroup>
 
 </Project>

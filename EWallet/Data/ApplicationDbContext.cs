@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using EWallet.Domain.Models;
 
-namespace EWallet.Models;
+namespace EWallet.Data;
 
 public class ApplicationDbContext : IdentityDbContext
 {

@@ -1,4 +1,6 @@
-namespace EWallet.Models;
+using EWallet.Domain.Models;
+
+namespace EWallet.Data;
 
 public interface ITransactionsRepository
 {

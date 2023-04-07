@@ -1,5 +1,6 @@
 using EWallet;
-using EWallet.Models;
+using EWallet.Data;
+using EWallet.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

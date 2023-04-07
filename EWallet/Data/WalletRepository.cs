@@ -1,8 +1,9 @@
 using System.Data;
 using Dapper;
+using EWallet.Domain.Models;
 using Microsoft.Data.SqlClient;
 
-namespace EWallet.Models;
+namespace EWallet.Data;
 
 public class WalletRepository : IWalletRepository
 {
