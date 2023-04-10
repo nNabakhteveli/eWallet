@@ -1,4 +1,5 @@
-using EWallet.Data;
+using EBank;
+using EWallet.Domain.Data;
 using EWallet.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,104 +9,60 @@ public class MoneyTransferController : Controller
 {
     private readonly ITransactionsRepository _transactionsRepository;
     private readonly IWalletRepository _walletRepository;
-    private readonly IConfiguration _configuration;
+    private readonly IEBank _bank;
     private string errorPageUrl = "/InvalidRequest";
 
-    public MoneyTransferController(IConfiguration configuration, ITransactionsRepository transactionsRepository, IWalletRepository walletRepository)
+    public MoneyTransferController(ITransactionsRepository transactionsRepository, IWalletRepository walletRepository, IEBank bank)
     {
         _transactionsRepository = transactionsRepository;
         _walletRepository = walletRepository;
-        _configuration = configuration;
+        _bank = bank;
     }
 
     [HttpPost]
     [Route("/Transactions/Deposit")]
-    public async Task Deposit(TransactionEntity transaction)
+    public async Task<IActionResult> Deposit(Deposit transaction)
     {
-        var bank = new EBank.EBank(_configuration.GetConnectionString("DefaultConnection"));
+        transaction.PaymentType = "Deposit";
         if (ModelState.IsValid)
         {
-            var userWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.UserId);
+            var createdTransaction = await _transactionsRepository.CreateAsync(transaction);
             
-            transaction.Status = 0;
-    
-            var createdtransaction = await _transactionsRepository.CreateAsync(transaction);
-    
-            userWallet.CurrentBalance -= transaction.Amount;
-    
-            var recipientWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.RecipientId);
-            recipientWallet.CurrentBalance += transaction.Amount;
-    
-            await _walletRepository.UpdateWalletAsync(userWallet);
-            await _walletRepository.UpdateWalletAsync(recipientWallet);
-            Redirect("/Identity/Account/Wallet");
+            // imitation of a bank
+            var transactionStatus = await _bank.ProcessDeposit(transaction, createdTransaction);
+            createdTransaction.Status = transactionStatus;
+            
+            await _transactionsRepository.UpdateAsync(createdTransaction);
+            
+            return Redirect("/Identity/Account/Wallet");
         }
     
         transaction.Status = 2;
     
         await _transactionsRepository.CreateAsync(transaction);
-        Redirect(errorPageUrl);
-        
-        bank.ProcessDeposit(1, 1, "");
+        return Redirect(errorPageUrl);
     }
-    // public async Task<IActionResult> Deposit(TransactionEntity transaction)
-    // {
-    //     if (ModelState.IsValid)
-    //     {
-    //         var userWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.UserId);
-    //
-    //         if (userWallet.CurrentBalance < transaction.Amount)
-    //         {
-    //             transaction.Status = 2;
-    //             await _transactionsRepository.CreateAsync(transaction);
-    //
-    //             return Redirect(errorPageUrl);
-    //         }
-    //
-    //         transaction.Status = 1;
-    //
-    //         var createdtransaction = await _transactionsRepository.CreateAsync(transaction);
-    //
-    //         userWallet.CurrentBalance -= transaction.Amount;
-    //
-    //         var recipientWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.RecipientId);
-    //         recipientWallet.CurrentBalance += transaction.Amount;
-    //
-    //         await _walletRepository.UpdateWalletAsync(userWallet);
-    //         await _walletRepository.UpdateWalletAsync(recipientWallet);
-    //         return Redirect("/Identity/Account/Wallet");
-    //     }
-    //
-    //     transaction.Status = 2;
-    //
-    //     await _transactionsRepository.CreateAsync(transaction);
-    //     return Redirect(errorPageUrl);
-    // }
-
+    
     [HttpPost]
     [Route("/Transactions/Withdraw")]
     public async Task<IActionResult> Withdraw(TransactionEntity transaction)
     {
+        transaction.PaymentType = "Withdraw";
         if (ModelState.IsValid)
         {
+            var createdTransaction = await _transactionsRepository.CreateAsync(transaction);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.UserId);
-
-            if (userWallet.CurrentBalance < transaction.Amount)
-            {
-                transaction.Status = 2;
-                await _transactionsRepository.CreateAsync(transaction);
-
-                return Redirect(errorPageUrl);
-            }
-
-            transaction.Status = 1;
-
-            await _transactionsRepository.CreateAsync(transaction);
-
+            
             userWallet.CurrentBalance -= transaction.Amount;
 
             await _walletRepository.UpdateWalletAsync(userWallet);
-            return Redirect("/Identity/Account/Wallet");
+            
+            var transactionStatus = await _bank.ProcessWithdraw(transaction, createdTransaction);
+            createdTransaction.Status = transactionStatus;
+
+            await _transactionsRepository.UpdateAsync(createdTransaction);
+            
+            return Redirect("/Identity/Account/Withdraw");
         }
 
         transaction.Status = 2;

@@ -1,19 +1,23 @@
+using EBank;
 using EWallet;
 using EWallet.Data;
+using EWallet.Domain.Data;
 using EWallet.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddScoped<IWalletRepository, WalletRepository>();
-builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+builder.Services.AddScoped<IWalletRepository>(s => new WalletRepository(defaultConnectionString));
+builder.Services.AddScoped<ITransactionsRepository>(s => new TransactionsRepository(defaultConnectionString));
+builder.Services.AddScoped<IEBank, EBank.EBank>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseSqlServer(defaultConnectionString);
 });
 
 builder.Services.AddDefaultIdentity<UserEntity>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -43,6 +47,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-
-DatabaseInitializer.AddStoredProcedures(builder.Configuration.GetConnectionString("DefaultConnection"));
+DatabaseInitializer.AddStoredProcedures(defaultConnectionString);
 app.Run();
