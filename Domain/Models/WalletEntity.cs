@@ -1,4 +1,4 @@
-namespace EWallet.Models;
+namespace EWallet.Domain.Models;
 
 public class WalletEntity
 {

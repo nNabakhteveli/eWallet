@@ -2,16 +2,17 @@ using System.Data;
 using Dapper;
 using EWallet.Domain.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
 
-namespace EWallet.Data;
+namespace EWallet.Domain.Data;
 
 public class WalletRepository : IWalletRepository
 {
     private IDbConnection db;
 
-    public WalletRepository(IConfiguration configuration)
+    public WalletRepository(string connectionString)
     {
-        db = new SqlConnection(configuration.GetConnectionString("DefaultConnection"));
+        db = new SqlConnection(connectionString);
     }
     
     public async Task<WalletEntity> CreateWallet(WalletEntity wallet)

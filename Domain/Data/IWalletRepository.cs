@@ -1,6 +1,6 @@
 using EWallet.Domain.Models;
 
-namespace EWallet.Data;
+namespace EWallet.Domain.Data;
 
 public interface IWalletRepository
 {

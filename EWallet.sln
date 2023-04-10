@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EWallet", "EWallet\EWallet.csproj", "{8476BAAC-0CFB-416D-8806-86338929441C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EBank", "EBank\EBank.csproj", "{EE414965-C85C-4141-8001-261D743DA937}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{45FABB5A-4BEF-4E2D-A0BE-605686D62E70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +16,13 @@ Global
 		{8476BAAC-0CFB-416D-8806-86338929441C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8476BAAC-0CFB-416D-8806-86338929441C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8476BAAC-0CFB-416D-8806-86338929441C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE414965-C85C-4141-8001-261D743DA937}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE414965-C85C-4141-8001-261D743DA937}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE414965-C85C-4141-8001-261D743DA937}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE414965-C85C-4141-8001-261D743DA937}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45FABB5A-4BEF-4E2D-A0BE-605686D62E70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45FABB5A-4BEF-4E2D-A0BE-605686D62E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45FABB5A-4BEF-4E2D-A0BE-605686D62E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45FABB5A-4BEF-4E2D-A0BE-605686D62E70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

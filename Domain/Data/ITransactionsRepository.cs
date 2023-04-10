@@ -1,8 +1,12 @@
 using EWallet.Domain.Models;
 
-namespace EWallet.Data;
+namespace EWallet.Domain.Data;
 
 public interface ITransactionsRepository
 {
     Task<TransactionEntity> CreateAsync(TransactionEntity transaction);
+    Task<Deposit> CreateAsync(Deposit transaction);
+    
+    Task<Deposit> UpdateAsync(Deposit transaction);
+    Task<TransactionEntity> UpdateAsync(TransactionEntity transaction);
 }
