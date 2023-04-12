@@ -2,9 +2,7 @@
 @inject UserManager<UserEntity> UserManager
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
-@* @model EWallet.Areas.Identity.Pages.Account.Wallet *@
 @using EWallet.Domain.Data
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model EWallet.Domain.Models.Deposit
 
 @{
@@ -14,13 +12,6 @@
     var wallet = walletRepository.GetWalletById(user.WalletId);
 }
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title></title>
-</head>
-<body>
 <div>
     @if (SignInManager.IsSignedIn(User))
     {
@@ -37,31 +28,101 @@
             </li>
         </ul>
 
-        <form class="w-75" method="POST" asp-controller="MoneyTransfer" asp-action="Deposit">
+        <form class="w-75" method="POST">
             <div class="mb-3 mt-4">
-                <label asp-for="RecipientId" class="form-label">Recipient ID</label>
-                <input type="text" asp-for="RecipientId" class="form-control" id="exampleInputRecipient" placeholder="Enter an ID of the recipient">
+                <label class="form-label">Recipient ID</label>
+                <input type="text" class="form-control RecipientId" id="exampleInputRecipient" placeholder="Enter an ID of the recipient">
             </div>
             <div class="mb-3 mt-4">
-                <label asp-for="Amount" class="form-label">Amount of money to deposit</label>
-                <input type="number" asp-for="Amount" class="form-control" id="exampleInputAmount" placeholder="Enter amount of money to deposit">
+                <label class="form-label">Amount of money to deposit</label>
+                <input type="number" class="form-control Amount" id="exampleInputAmount" placeholder="Enter amount of money to deposit">
             </div>
 
-            <select class="custom-select mb-3" asp-for="Currency">
+            <select class="custom-select mb-3 Currency">
                 <option value="USD" selected>USD</option>
                 <option value="EUR">EUR</option>
                 <option value="GEL">GEL</option>
             </select>
-            
-            <input asp-for="UserId" value="@UserManager.GetUserId(User)" class="invisible" />
+
+            <input value="@UserManager.GetUserId(User)" class="invisible UserId"/>
             <br/>
             <button type="submit" class="btn btn-primary">Deposit</button>
         </form>
+        <button type="submit" class="btn btn-primary deposit-btn">yay</button>
     }
     else
     {
         @Redirect("/")
     }
 </div>
-</body>
-</html>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(() => {
+    const successToast = Swal.mixin({
+      toast: true,
+      position: 'top-right',
+      iconColor: 'green',
+      customClass: {
+        popup: 'colored-toast'
+      },
+      showConfirmButton: false,
+      timer: 1500,
+      timerProgressBar: true
+    });
+    
+    const errorToast = Swal.mixin({
+          toast: true,
+          position: 'top-right',
+          iconColor: 'red',
+          customClass: {
+            popup: 'colored-toast'
+          },
+          showConfirmButton: false,
+          timer: 1500,
+          timerProgressBar: true
+    });
+    
+    $(".deposit-btn").on("click", () => {
+        const transaction = {
+           UserId: $(".UserId").val(),
+           RecipientId: $(".RecipientId").val(),
+           PaymentType: "Deposit",
+           Amount: $(".Amount").val(),
+           Currency: $(".Currency").val(),
+           CreateDate: new Date(),
+           Status: 0
+       }
+       
+       let currencySign = "$";
+        
+       console.log(transaction);
+       if (transaction.Currency === "GEL") currencySign = "₾";
+       else if (transaction.Currency === "EUR") currencySign = "€";
+                       
+       $.ajax({
+           type: 'POST',
+           url: '/transactions/api/deposit',
+           data: transaction,
+           success: data => {
+               console.log(data);
+               if (data.success) {
+                successToast.fire({
+                    icon: 'success',
+                    title: `Success! ${currencySign}${transaction.Amount} sent to the recipient.`
+                });   
+               } else {
+                   errorToast.fire({
+                       icon: 'error',
+                       title: 'Failure'
+                   });
+               }
+           }
+       }); 
+    });
+});
+
+</script>
