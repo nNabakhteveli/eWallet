@@ -17,7 +17,7 @@
     {
         <h1>@UserManager.GetUserName(User)</h1>
         <h5>(User id: @UserManager.GetUserId(User))</h5>
-        <p>Current balance: @wallet.CurrentBalance</p>
+        <p>Current balance: <b>$@wallet.CurrentBalance</b></p>
 
         <ul class="nav nav-pills nav-fill">
             <li class="nav-item">
@@ -46,9 +46,8 @@
 
             <input value="@UserManager.GetUserId(User)" class="invisible UserId"/>
             <br/>
-            <button type="submit" class="btn btn-primary">Deposit</button>
+            <button class="btn btn-primary deposit-btn">Deposit</button>
         </form>
-        <button type="submit" class="btn btn-primary deposit-btn">yay</button>
     }
     else
     {
@@ -70,7 +69,7 @@ $(document).ready(() => {
         popup: 'colored-toast'
       },
       showConfirmButton: false,
-      timer: 1500,
+      timer: 5000,
       timerProgressBar: true
     });
     
@@ -82,24 +81,23 @@ $(document).ready(() => {
             popup: 'colored-toast'
           },
           showConfirmButton: false,
-          timer: 1500,
+          timer: 2500,
           timerProgressBar: true
     });
     
-    $(".deposit-btn").on("click", () => {
+    $(".deposit-btn").on("click", (event) => {
+        event.preventDefault();
+        
+        let currencySign = "$";
         const transaction = {
            UserId: $(".UserId").val(),
            RecipientId: $(".RecipientId").val(),
            PaymentType: "Deposit",
            Amount: $(".Amount").val(),
            Currency: $(".Currency").val(),
-           CreateDate: new Date(),
            Status: 0
        }
        
-       let currencySign = "$";
-        
-       console.log(transaction);
        if (transaction.Currency === "GEL") currencySign = "₾";
        else if (transaction.Currency === "EUR") currencySign = "€";
                        
@@ -108,11 +106,10 @@ $(document).ready(() => {
            url: '/transactions/api/deposit',
            data: transaction,
            success: data => {
-               console.log(data);
-               if (data.success) {
+               if (data.success) {                   
                 successToast.fire({
                     icon: 'success',
-                    title: `Success! ${currencySign}${transaction.Amount} sent to the recipient.`
+                    title: `Success! ${currencySign}${transaction.Amount} sent to the recipient. The deposit is in the pending stage.`
                 });   
                } else {
                    errorToast.fire({

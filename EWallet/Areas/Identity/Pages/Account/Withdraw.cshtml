@@ -2,9 +2,7 @@
 @inject UserManager<UserEntity> UserManager
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
-@using EWallet.Data
 @using EWallet.Domain.Data
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model EWallet.Domain.Models.TransactionEntity
 
 
@@ -15,19 +13,12 @@
     var wallet = walletRepository.GetWalletById(user.WalletId);
 }
 
-<!DOCTYPE html>
-
-<html>
-<head>
-    <title></title>
-</head>
-<body>
 <div>
     @if (SignInManager.IsSignedIn(User))
     {
         <h1>@UserManager.GetUserName(User)</h1>
         <h5>(User id: @UserManager.GetUserId(User))</h5>
-        <p>Current balance: @wallet.CurrentBalance</p>
+        <p>Current balance: <b>$@wallet.CurrentBalance</b></p>
 
         <ul class="nav nav-pills nav-fill">
             <li class="nav-item">
@@ -38,21 +29,21 @@
             </li>
         </ul>
 
-        <form class="w-75" method="POST" asp-controller="MoneyTransfer" asp-action="Withdraw">
+        <form class="w-75" method="POST">
             <div class="mb-3 mt-4">
-                <label asp-for="Amount" class="form-label">Amount of money to withdraw</label>
-                <input type="number" asp-for="Amount" class="form-control" id="exampleInputAmount" placeholder="Enter amount of money to withdraw">
+                <label class="form-label">Amount of money to withdraw</label>
+                <input type="number" class="form-control Amount" id="exampleInputAmount" placeholder="Enter amount of money to withdraw">
             </div>
 
-            <select class="custom-select mb-3" asp-for="Currency">
+            <select class="custom-select mb-3 Currency">
                 <option value="USD" selected>USD</option>
                 <option value="EUR">EUR</option>
                 <option value="GEL">GEL</option>
             </select>
 
-            <input asp-for="UserId" value="@UserManager.GetUserId(User)" class="invisible"/>
+            <input value="@UserManager.GetUserId(User)" class="invisible UserId"/>
             <br/>
-            <button type="submit" class="btn btn-primary">Withdraw</button>
+            <button class="btn btn-primary withdraw-btn">Withdraw</button>
         </form>
     }
     else
@@ -60,5 +51,71 @@
         @Redirect("/")
     }
 </div>
-</body>
-</html>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(() => {
+    const successToast = Swal.mixin({
+      toast: true,
+      position: 'top-right',
+      iconColor: 'green',
+      customClass: {
+        popup: 'colored-toast'
+      },
+      showConfirmButton: false,
+      timer: 4000,
+      timerProgressBar: true
+    });
+    
+    const errorToast = Swal.mixin({
+          toast: true,
+          position: 'top-right',
+          iconColor: 'red',
+          customClass: {
+            popup: 'colored-toast'
+          },
+          showConfirmButton: false,
+          timer: 2500,
+          timerProgressBar: true
+    });
+    
+    $(".withdraw-btn").on("click", (event) => {
+        event.preventDefault();
+        
+        let currencySign = "$";
+        const transaction = {
+           UserId: $(".UserId").val(),
+           PaymentType: "Withdraw",
+           Amount: $(".Amount").val(),
+           Currency: $(".Currency").val(),
+           Status: 0
+       }
+       
+       if (transaction.Currency === "GEL") currencySign = "₾";
+       else if (transaction.Currency === "EUR") currencySign = "€";
+                       
+       $.ajax({
+           type: 'POST',
+           url: '/transactions/api/withdraw',
+           data: transaction,
+           success: data => {
+               if (data.success) {                   
+                successToast.fire({
+                    icon: 'success',
+                    title: `Success! The Withdraw is in the pending stage now.`
+                });   
+               } else {
+                   errorToast.fire({
+                       icon: 'error',
+                       title: 'Failure'
+                   });
+               }
+           }
+       }); 
+    });
+});
+
+</script>
