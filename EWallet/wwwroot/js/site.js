@@ -1,4 +1,19 @@
-﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿const js = jQuery.noConflict(true);
 
-// Write your JavaScript code.
+js.fn.dataTableExt.afnFiltering.push(
+    function( settings, data, dataIndex ) {
+        const min = js('#min').val();
+        const max = js('#max').val();
+        const date = data[0].split(" ")[0].replaceAll(".", "-").split("-").reverse().join("-")
+
+        if (date >= min && date <= max || min === "" || max === "") return true;
+        return false;
+    }
+);
+
+js(document).ready(function() {
+    const table = js('#tbllist').DataTable();
+
+    js('#min').change( function() { table.draw(); } );
+    js('#max').change( function() { table.draw(); } );
+});

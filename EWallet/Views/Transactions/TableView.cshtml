@@ -67,26 +67,4 @@
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-<script type="text/javascript">
-const js = jQuery.noConflict(true);
-
-js.fn.dataTableExt.afnFiltering.push(
-    function( settings, data, dataIndex ) {
-        const min = js('#min').val();
-        const max = js('#max').val();
-        const date = data[0].split(" ")[0].replaceAll(".", "-").split("-").reverse().join("-")
-
-        if (date >= min && date <= max || min === "" || max === "") return true;
-        return false;
-    }
-);
-
-js(document).ready(function() {
-    const table = js('#tbllist').DataTable();
-    
-    js('#min').change( function() { table.draw(); } );
-    js('#max').change( function() { table.draw(); } );
-});
-    
-</script>
+<script src="~/js/site.js"></script>
