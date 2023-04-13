@@ -9,4 +9,5 @@ public interface ITransactionsRepository
     
     Task<Deposit> UpdateAsync(Deposit transaction);
     Task<TransactionEntity> UpdateAsync(TransactionEntity transaction);
+    Task<IEnumerable<Deposit>> GetAllAsync();
 }

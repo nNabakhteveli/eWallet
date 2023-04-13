@@ -1,0 +1,92 @@
+@model IEnumerable<EWallet.Domain.Models.Deposit>
+
+@{
+    Layout = "_Layout";
+}
+
+<html>
+<head>
+    <title>Transactions History</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/datetime/1.4.0/css/dataTables.dateTime.min.css"/>
+    <link href="https://cdn.datatables.net/datetime/1.4.0/css/dataTables.dateTime.min.css" rel="stylesheet"/>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.2/moment.min.js"></script>
+    <script src="https://cdn.datatables.net/datetime/1.4.0/js/dataTables.dateTime.min.js"></script>
+
+    <script src="https://cdn.datatables.net/plug-ins/1.13.4/sorting/date-dd-MMM-yyyy.js"></script>
+</head>
+<body>
+<div>
+    <table>
+        <tbody>
+        <tr>
+            <td>Minimum date:</td>
+            <td>
+                <input type="date" id="min" name="min">
+            </td>
+        </tr>
+        <tr>
+            <td>Maximum date:</td>
+            <td>
+                <input type="date" id="max" name="max">
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <table class="table" id="tbllist">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Success</th>
+            <th>Payment Type</th>
+            <th>Currency</th>
+            <th>Amount</th>
+        </tr>
+        </thead>
+        <tbody class="form-tbody">
+
+        @foreach (var transaction in Model)
+        {
+            <tr>
+                <th>@transaction.CreateDate</th>
+                <td>@transaction.Status</td>
+                <td>@transaction.PaymentType</td>
+                <td>@transaction.Currency</td>
+                <td>@transaction.Amount</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="text/javascript">
+const js = jQuery.noConflict(true);
+
+js.fn.dataTableExt.afnFiltering.push(
+    function( settings, data, dataIndex ) {
+        const min = js('#min').val();
+        const max = js('#max').val();
+        const date = data[0].split(" ")[0].replaceAll(".", "-").split("-").reverse().join("-")
+
+        if (date >= min && date <= max || min === "" || max === "") return true;
+        return false;
+    }
+);
+
+js(document).ready(function() {
+    const table = js('#tbllist').DataTable();
+    
+    js('#min').change( function() { table.draw(); } );
+    js('#max').change( function() { table.draw(); } );
+});
+    
+</script>

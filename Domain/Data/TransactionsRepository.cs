@@ -14,6 +14,17 @@ public class TransactionsRepository : ITransactionsRepository
         db = new SqlConnection(connectionString);
     }
 
+    public async Task<IEnumerable<Deposit>> FilterInRange(string startDate, string endDate)
+    {
+        return (await db.QueryAsync<Deposit>(
+            "SELECT * FROM Transactions WHERE CreateDate BETWEEN @StartDate AND @EndDate", new { startDate, endDate })).ToList();
+    }
+
+    public async Task<IEnumerable<Deposit>> GetAllAsync()
+    {
+        return (await db.QueryAsync<Deposit>("SELECT * FROM Transactions")).ToList();
+    }
+
     public async Task<TransactionEntity> CreateAsync(TransactionEntity transaction)
     {
         var sql =
@@ -62,7 +73,7 @@ public class TransactionsRepository : ITransactionsRepository
 
         return transaction;
     }
-    
+
     public async Task<Deposit> UpdateAsync(Deposit transaction)
     {
         var sql =
