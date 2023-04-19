@@ -31,4 +31,8 @@
       <ProjectReference Include="..\EBank\EBank.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Models\FilterInRangeViewModel.cs" />
+    </ItemGroup>
+
 </Project>
