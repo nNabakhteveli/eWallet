@@ -30,11 +30,21 @@ public class TokenRepository : ITokenRepository
         return tokenData;
     }
 
-    public async Task<TokenEntity> GetByUserIdAsync(string id)
+    public async Task<TokenEntity> GetByUserToken(Guid token)
     {
-        return (await db.QueryAsync<TokenEntity>("SELECT * FROM Tokens WHERE UserId = @Id", new { id })).SingleOrDefault();
+        return (await db.QueryAsync<TokenEntity>("SELECT * FROM Tokens WHERE PrivateToken = @Token", new { token })).FirstOrDefault();
     }
 
+    public async Task<TokenEntity> GetByUserIdAsync(string id)
+    {
+        return (await db.QueryAsync<TokenEntity>("SELECT * FROM Tokens WHERE UserId = @Id", new { id })).FirstOrDefault();
+    }
+
+    public async Task DeleteAsync(Guid userId)
+    {
+        await db.QueryAsync<TokenEntity>("DELETE FROM Tokens Where UserId = @UserId", new { UserId = userId });
+    }
+    
     public async Task DeleteAsync(TokenEntity token)
     {
         await db.QueryAsync<TokenEntity>("DELETE FROM Tokens Where Id = @Id", new { token.Id });

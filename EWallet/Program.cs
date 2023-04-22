@@ -13,6 +13,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IWalletRepository>(s => new WalletRepository(defaultConnectionString));
 builder.Services.AddScoped<ITransactionsRepository>(s => new TransactionsRepository(defaultConnectionString));
+builder.Services.AddScoped<ITokenRepository>(s => new TokenRepository(defaultConnectionString));
+
 builder.Services.AddScoped<IEBank, EBank.EBank>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

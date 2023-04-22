@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EWallet.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230419183304_InitialMigration")]
+    [Migration("20230420215247_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -40,9 +40,8 @@ namespace EWallet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublicToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("PublicToken")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PublicTokenStatus")
                         .IsRequired()

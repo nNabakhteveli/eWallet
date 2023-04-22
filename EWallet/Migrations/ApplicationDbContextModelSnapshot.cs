@@ -37,9 +37,8 @@ namespace EWallet.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PublicToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("PublicToken")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PublicTokenStatus")
                         .IsRequired()

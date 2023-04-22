@@ -60,7 +60,7 @@ namespace EWallet.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PublicToken = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PublicToken = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PublicTokenStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PrivateToken = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PrivateTokenStatus = table.Column<string>(type: "nvarchar(max)", nullable: false)

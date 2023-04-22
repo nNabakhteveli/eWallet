@@ -1,5 +1,7 @@
 using EWallet.Data;
+using EWallet.Domain.Data;
 using EWallet.Domain.Models;
+using EWallet.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +21,9 @@ namespace EWallet.Controllers
         // GET: User
         public async Task<IActionResult> Index()
         {
-              return _context.Users != null ? 
-                          View(await _context.Users.ToListAsync()) :
-                          Problem("Entity set 'ApplicationDbContext.Users'  is null.");
+            return _context.Users != null
+                ? View(await _context.Users.ToListAsync())
+                : Problem("Entity set 'ApplicationDbContext.Users'  is null.");
         }
 
         // GET: User/Details/5
@@ -59,6 +61,7 @@ namespace EWallet.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             return View(userEntity);
         }
 
@@ -75,6 +78,7 @@ namespace EWallet.Controllers
             {
                 return NotFound();
             }
+
             return View(userEntity);
         }
 
@@ -106,8 +110,10 @@ namespace EWallet.Controllers
                         throw;
                     }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(userEntity);
         }
 
@@ -138,19 +144,20 @@ namespace EWallet.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.Users'  is null.");
             }
+
             var userEntity = await _context.Users.FindAsync(id);
             if (userEntity != null)
             {
                 _context.Users.Remove(userEntity);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool UserEntityExists(int id)
         {
-          return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
