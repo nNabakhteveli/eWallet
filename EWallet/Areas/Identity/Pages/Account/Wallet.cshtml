@@ -2,6 +2,7 @@
 @inject UserManager<UserEntity> UserManager
 @inject SignInManager<UserEntity> SignInManager
 @inject IWalletRepository walletRepository
+@inject ITokenRepository tokenRepository
 @using EWallet.Domain.Data
 @model EWallet.Domain.Models.Deposit
 
@@ -10,11 +11,20 @@
 
     var user = await UserManager.GetUserAsync(User);
     var wallet = walletRepository.GetWalletById(user.WalletId);
+    var token = await tokenRepository.GetByUserIdAsync(UserManager.GetUserId(User));
+
+    var publicToken = Guid.NewGuid();
 }
 
 <div>
     @if (SignInManager.IsSignedIn(User))
     {
+        @if (token == null)
+        {
+            <button class="btn btn-dark token-generator-btn" onclick="setPublicToken('@publicToken')">Generate token</button>
+            <h2 class="public-token"></h2>
+        }
+
         <h1>@UserManager.GetUserName(User)</h1>
         <h5>(User id: @UserManager.GetUserId(User))</h5>
         <p>Current balance: <b>$@wallet.CurrentBalance</b></p>

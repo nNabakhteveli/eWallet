@@ -1,4 +1,12 @@
+function setPublicToken(token) {
+    localStorage.setItem('publicToken', token);
+}
+
 $(document).ready(() => {
+    $('.token-generator-btn').on('click', () => {
+        $('.public-token').text(`Public Token: ${localStorage.getItem('publicToken')}`);
+    });
+    
     $(".deposit-btn").on("click", (event) => {
         event.preventDefault();
 
