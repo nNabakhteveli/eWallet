@@ -13,122 +13,101 @@ public class TransferController : ControllerBase
     private readonly IWalletRepository _walletRepository;
     private readonly ITransactionsRepository _transactionsRepository;
 
-    public TransferController(ITokenRepository tokenRepository, IWalletRepository walletRepository, ITransactionsRepository transactionsRepository)
+    public TransferController(ITokenRepository tokenRepository, IWalletRepository walletRepository,
+        ITransactionsRepository transactionsRepository)
     {
         _tokenRepository = tokenRepository;
         _walletRepository = walletRepository;
         _transactionsRepository = transactionsRepository;
     }
 
-    [HttpPost]
-    [Route("deposit")]
-    public async Task<IActionResult> Deposit(TransferRequest deposit)
+    [HttpPost("deposit")]
+    public async Task<IActionResult> Deposit(TransferRequest req)
     {
-        var userWallet = await _walletRepository.GetWalletByUserIdAsync(deposit.UserId);
-        var userToken = await _tokenRepository.GetByUserIdAsync(deposit.UserId);
-
-        if (userToken == null) return StatusCode(StatusCodes.Status406NotAcceptable, new { StatusCode = 406 });
+        var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
+        var userToken = await _tokenRepository.GetByUserIdAsync(req.UserId);
+        var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
         
-        if (userToken.PrivateTokenStatus != "active" || userToken.PublicTokenStatus != "active" || userToken.PrivateToken != deposit.Token)
-            return StatusCode(StatusCodes.Status401Unauthorized, new { StatusCode = 401 });
-
-        if (userWallet.CurrentBalance < deposit.Amount)
-            return StatusCode(StatusCodes.Status407ProxyAuthenticationRequired, new { StatusCode = 407 });
-
+        if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
 
         var newTransaction = new TransactionEntity
         {
             UserId = userWallet.UserId,
             PaymentType = "Deposit",
-            Amount = (decimal) deposit.Amount,
-            Currency = deposit.Currency,
+            Amount = (decimal)req.Amount,
+            Currency = req.Currency,
             CreateDate = DateTime.Now,
-            Status = 1            
+            Status = 1
         };
-        var newCalculatedBalance = userWallet.CurrentBalance + deposit.Amount;
-        
-        userWallet.CurrentBalance = (decimal) newCalculatedBalance;
-        await _walletRepository.UpdateWalletAsync(userWallet);
-        var createdTransaction = await _transactionsRepository.CreateAsync(newTransaction);
 
-        var responseData = new TransferResponse
+        var newCalculatedBalance = userWallet.CurrentBalance + req.Amount;
+        userWallet.CurrentBalance = (decimal)newCalculatedBalance;
+
+        try
         {
-            StatusCode = 200,
-            Data = new TransferResponseData
-            {
-                TransactionId = createdTransaction.Id,
-                Balance = (decimal) newCalculatedBalance
-            }
-        };
-        
-        return StatusCode(StatusCodes.Status200OK, responseData);
+            await _walletRepository.UpdateWalletAsync(userWallet);
+
+            var createdTransaction = await _transactionsRepository.CreateAsync(newTransaction);
+
+            return StatusCode(statusCode,
+                ApiHelper.GenerateTransferResponse(statusCode, (decimal)newCalculatedBalance, createdTransaction.Id));
+        }
+        catch (Exception)
+        {
+            statusCode = 500;
+            return StatusCode(statusCode, new { statusCode });
+        }
     }
-    
-    
-    [HttpPost]
-    [Route("withdraw")]
-    public async Task<IActionResult> Withdraw(TransferRequest withdraw)
+
+    [HttpPost("withdraw")]
+    public async Task<IActionResult> Withdraw(TransferRequest req)
     {
-        var userWallet = await _walletRepository.GetWalletByUserIdAsync(withdraw.UserId);
-        var userToken = await _tokenRepository.GetByUserIdAsync(withdraw.UserId);
+        var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
+        var userToken = await _tokenRepository.GetByUserIdAsync(req.UserId);
+        var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
-        if (userToken == null) return StatusCode(StatusCodes.Status406NotAcceptable, new { StatusCode = 406 });
+        if (userWallet.CurrentBalance < req.Amount) statusCode = 407;
+        if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
 
-        if (userToken.PrivateTokenStatus != "active" || userToken.PublicTokenStatus != "active" || userToken.PrivateToken != withdraw.Token)
-            return StatusCode(StatusCodes.Status401Unauthorized, new { StatusCode = 401 });
-        
-        if (userWallet.CurrentBalance < withdraw.Amount)
-            return StatusCode(StatusCodes.Status407ProxyAuthenticationRequired, new { StatusCode = 407 });
-        
         var newTransaction = new TransactionEntity
         {
             UserId = userWallet.UserId,
             PaymentType = "Withdraw",
-            Amount = (decimal) withdraw.Amount,
-            Currency = withdraw.Currency,
+            Amount = (decimal)req.Amount,
+            Currency = req.Currency,
             CreateDate = DateTime.Now,
-            Status = 1            
+            Status = 1
         };
-        var newCalculatedBalance = userWallet.CurrentBalance - withdraw.Amount;
-        
-        userWallet.CurrentBalance = (decimal) newCalculatedBalance;
-        await _walletRepository.UpdateWalletAsync(userWallet);
-        var createdTransaction = await _transactionsRepository.CreateAsync(newTransaction);
-        
-        var responseData = new TransferResponse()
+
+        var newCalculatedBalance = userWallet.CurrentBalance - req.Amount;
+        userWallet.CurrentBalance = (decimal)newCalculatedBalance;
+
+        try
         {
-            StatusCode = 200,
-            Data = new TransferResponseData()
-            {
-                TransactionId = createdTransaction.Id,
-                Balance = (decimal) newCalculatedBalance
-            }
-        };
-        
-        return StatusCode(StatusCodes.Status200OK, responseData);
+            await _walletRepository.UpdateWalletAsync(userWallet);
+            var createdTransaction = await _transactionsRepository.CreateAsync(newTransaction);
+
+            return StatusCode(statusCode,
+                ApiHelper.GenerateTransferResponse(statusCode, (decimal)newCalculatedBalance, createdTransaction.Id));
+        }
+        catch (Exception)
+        {
+            statusCode = 500;
+            return StatusCode(statusCode, new { statusCode });
+        }
     }
-    
-    [HttpPost]
-    [Route("GetBalance")]
-    public async Task<IActionResult> GetBalance(TransferRequest transferReq)
+
+    [HttpPost("GetBalance")]
+    public async Task<IActionResult> GetBalance(TransferRequest req)
     {
-        var userWallet = await _walletRepository.GetWalletByUserIdAsync(transferReq.UserId);
-        var userToken = await _tokenRepository.GetByUserIdAsync(transferReq.UserId);
+        var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
+        var userToken = await _tokenRepository.GetByUserIdAsync(req.UserId);
 
-        if (userToken == null) return StatusCode(StatusCodes.Status406NotAcceptable, new { StatusCode = 406 });
+        var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
-        if (userToken.PrivateTokenStatus != "active" || userToken.PublicTokenStatus != "active" || userToken.PrivateToken != transferReq.Token)
-            return StatusCode(StatusCodes.Status401Unauthorized, new { StatusCode = 401 });
-
-        var responseData = new TransferResponse()
-        {
-            StatusCode = 200,
-            Data = new TransferResponseData()
-            {
-                Balance = userWallet.CurrentBalance
-            }
-        };
-        
-        return StatusCode(StatusCodes.Status200OK, responseData);
+        return statusCode != 200
+            ? StatusCode(statusCode, new { statusCode })
+            : StatusCode(StatusCodes.Status200OK,
+                ApiHelper.GenerateTransferResponse(statusCode, balance: userWallet.CurrentBalance));
     }
 }

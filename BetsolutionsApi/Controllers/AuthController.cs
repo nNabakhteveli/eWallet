@@ -16,33 +16,28 @@ public class AuthController : ControllerBase
         _tokenRepository = tokenRepository;
     }
 
-    [HttpPost]
-    [Route("/auth/auth")]
+    [HttpPost("/auth/auth")]
     public async Task<IActionResult> Auth(Auth auth)
     {
         var userToken = await _tokenRepository.GetByUserIdAsync(auth.UserId);
 
         if (userToken != null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 411 });
-        
-        var newToken = new TokenEntity()
+
+        var newToken = new TokenEntity
         {
             UserId = auth.UserId,
             PublicToken = auth.PublicKey,
             PrivateToken = Guid.NewGuid(),
         };
 
-        await _tokenRepository.CreateAsync(newToken);
-
-        return Ok(new { newToken.PublicToken, newToken.PrivateToken });
+        try
+        {
+            await _tokenRepository.CreateAsync(newToken);
+            return Ok(new { newToken.PublicToken, newToken.PrivateToken });
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status411LengthRequired);
+        }
     }
-    
-    // [HttpPost]
-    // [Route("/auth/DeleteToken")]
-    // public async Task<IActionResult> DeleteToken(string userId)
-    // {
-    //     Console.WriteLine(userId);
-    //     // await _tokenRepository.DeleteAsync(userId);
-    //
-    //     return StatusCode(StatusCodes.Status202Accepted, new { StatusCode = 202 });
-    // }
 }

@@ -24,6 +24,10 @@
             <button class="btn btn-dark token-generator-btn" onclick="setPublicToken('@publicToken')">Generate token</button>
             <h2 class="public-token"></h2>
         }
+        else
+        {
+            <h2 class="public-token">Your public token: @token.PublicToken</h2>
+        }
 
         <h1>@UserManager.GetUserName(User)</h1>
         <h5>(User id: @UserManager.GetUserId(User))</h5>
