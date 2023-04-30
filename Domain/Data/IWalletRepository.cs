@@ -8,5 +8,4 @@ public interface IWalletRepository
     WalletEntity GetWalletById(int id);
     Task<WalletEntity> GetWalletByUserIdAsync(string id);
     Task<WalletEntity> UpdateWalletAsync(WalletEntity wallet);
-    void DeleteWallet(int id);
 }

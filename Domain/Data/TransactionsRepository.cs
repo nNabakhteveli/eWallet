@@ -1,4 +1,5 @@
 using System.Data;
+using System.Transactions;
 using Dapper;
 using EWallet.Domain.Models;
 using Microsoft.Data.SqlClient;
@@ -14,43 +15,46 @@ public class TransactionsRepository : ITransactionsRepository
         db = new SqlConnection(connectionString);
     }
 
-    public async Task<IEnumerable<Deposit>> FilterInRange(string startDate, string endDate)
+    public async Task<IEnumerable<TransactionEntity>> FilterInRange(string startDate, string endDate)
     {
-        return (await db.QueryAsync<Deposit>(
-            "SELECT * FROM Transactions WHERE CreateDate BETWEEN @StartDate AND @EndDate", new { startDate, endDate })).ToList();
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@StartDate", startDate);
+        parameters.Add("@EndDate", endDate);
+        
+        var a = await db.QueryAsync<TransactionEntity>("GetTransactionsInRange", parameters, commandType: CommandType.StoredProcedure);
+
+        foreach (var i in a)
+        {
+            Console.WriteLine(i.CreateDate);
+            Console.WriteLine(i.Amount);
+            Console.WriteLine(i.PaymentType);
+            Console.WriteLine();
+        }
+
+        return a;
     }
 
-    public async Task<IEnumerable<Deposit>> GetAllAsync()
+    public async Task<IEnumerable<TransactionEntity>> GetAllAsync()
     {
-        return (await db.QueryAsync<Deposit>("SELECT * FROM Transactions")).ToList();
+        return await db.QueryAsync<TransactionEntity>("GetAllTransactions", commandType: CommandType.StoredProcedure);
     }
 
     public async Task<TransactionEntity> CreateAsync(TransactionEntity transaction)
     {
-        var sql =
-            "INSERT INTO Transactions " +
-            "(UserId, Amount, PaymentType, Currency, CreateDate, Status)" +
-            " VALUES (@UserId, @Amount, @PaymentType, @Currency, @CreateDate, @Status)" +
-            "SET @Id = cast(scope_identity() as int) " +
-            "SELECT SCOPE_IDENTITY() AS NewId";
+        var parameters = new DynamicParameters();
 
-        var newId = (int)(await db.QueryAsync(sql, transaction)).SingleOrDefault().NewId;
+        parameters.Add("@Id", value: transaction.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@UserId", transaction.UserId);
+        parameters.Add("@PaymentType", transaction.PaymentType);
+        parameters.Add("@Amount", transaction.Amount);
+        parameters.Add("@Currency", transaction.Currency);
+        parameters.Add("@CreateDate", transaction.CreateDate);
+        parameters.Add("@Status", transaction.Status);
 
-        transaction.Id = newId;
-
-        return transaction;
-    }
-
-    public async Task<Deposit> CreateAsync(Deposit transaction)
-    {
-        var sql =
-            "INSERT INTO Transactions " +
-            "(UserId, RecipientId, PaymentType, Amount, Currency, CreateDate, Status)" +
-            " VALUES (@UserId, @RecipientId, @PaymentType, @Amount, @Currency, @CreateDate, @Status)" +
-            "SET @Id = cast(scope_identity() as int) " +
-            "SELECT SCOPE_IDENTITY() AS NewId";
-
-        var newId = (int)(await db.QueryAsync(sql, transaction)).SingleOrDefault().NewId;
+        var newId =
+            (await db.QueryAsync<int>("CreateTransaction", parameters, commandType: CommandType.StoredProcedure))
+            .FirstOrDefault();
 
         transaction.Id = newId;
 
@@ -59,34 +63,17 @@ public class TransactionsRepository : ITransactionsRepository
 
     public async Task<TransactionEntity> UpdateAsync(TransactionEntity transaction)
     {
-        var sql =
-            "UPDATE Transactions " +
-            "SET UserId = @UserId, " +
-            "PaymentType = @PaymentType, " +
-            "Amount = @Amount, " +
-            "Currency = @Currency, " +
-            "CreateDate = @CreateDate, " +
-            "Status = @Status " +
-            "WHERE Id = @Id";
+        var parameters = new DynamicParameters();
 
-        await db.ExecuteAsync(sql, transaction);
+        parameters.Add("@Id", value: transaction.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@UserId", transaction.UserId);
+        parameters.Add("@PaymentType", transaction.PaymentType);
+        parameters.Add("@Amount", transaction.Amount);
+        parameters.Add("@Currency", transaction.Currency);
+        parameters.Add("@CreateDate", transaction.CreateDate);
+        parameters.Add("@Status", transaction.Status);
 
-        return transaction;
-    }
-
-    public async Task<Deposit> UpdateAsync(Deposit transaction)
-    {
-        var sql =
-            "UPDATE Transactions " +
-            "SET UserId = @UserId, " +
-            "PaymentType = @PaymentType, " +
-            "Amount = @Amount, " +
-            "Currency = @Currency, " +
-            "CreateDate = @CreateDate, " +
-            "Status = @Status " +
-            "WHERE Id = @Id";
-
-        await db.ExecuteAsync(sql, transaction);
+        await db.ExecuteAsync("UpdateTransaction", parameters, commandType: CommandType.StoredProcedure);
 
         return transaction;
     }

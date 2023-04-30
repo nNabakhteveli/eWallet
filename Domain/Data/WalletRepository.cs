@@ -17,14 +17,13 @@ public class WalletRepository : IWalletRepository
     
     public async Task<WalletEntity> CreateWallet(WalletEntity wallet)
     {
-        var sql =
-            "INSERT INTO Wallets " +
-            "(CurrentBalance)" +
-            " VALUES (@CurrentBalance)" +
-            "SET @Id = cast(scope_identity() as int) " +
-            "SELECT SCOPE_IDENTITY() AS NewId";
+        var parameters = new DynamicParameters();
 
-        var newId = (int)(await db.QueryAsync(sql, wallet)).SingleOrDefault().NewId;
+        parameters.Add("@Id", value: wallet.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@CurrentBalance", wallet.CurrentBalance);
+
+        var newId = (await db.QueryAsync<int>("CreateWallet", parameters, commandType: CommandType.StoredProcedure))
+            .SingleOrDefault();
         
         wallet.Id = newId;
         
@@ -33,29 +32,31 @@ public class WalletRepository : IWalletRepository
 
     public WalletEntity GetWalletById(int id)
     {
-        return db.Query<WalletEntity>("SELECT Id, CurrentBalance FROM Wallets WHERE Id = @Id", new { id }).SingleOrDefault();
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@Id", value: id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        
+        return db.Query<WalletEntity>("GetWalletById", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
     }
     
     public async Task<WalletEntity> GetWalletByUserIdAsync(string id)
     {
-        return (await db.QueryAsync<WalletEntity>("SELECT Id, UserId, CurrentBalance FROM Wallets WHERE UserId = @Id", new { id })).SingleOrDefault();
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@UserId", value: id);
+        
+        return (await db.QueryAsync<WalletEntity>("GetWalletByUserId", parameters, commandType: CommandType.StoredProcedure)).SingleOrDefault();
     }
 
     public async Task<WalletEntity> UpdateWalletAsync(WalletEntity wallet)
     {
-        var sql =
-            "UPDATE Wallets " +
-            "SET UserId = @UserId, " +
-            "CurrentBalance = @CurrentBalance " +
-            "WHERE Id = @Id";
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@Id", value: wallet.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@CurrentBalance", wallet.CurrentBalance);
 
-        await db.ExecuteAsync(sql, wallet);
+        await db.ExecuteAsync("UpdateWallet", parameters, commandType: CommandType.StoredProcedure);
 
         return wallet;
-    }
-
-    public void DeleteWallet(int id)
-    {
-        throw new NotImplementedException();
     }
 }
