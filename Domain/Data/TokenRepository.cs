@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.Common;
 using Dapper;
 using EWallet.Domain.Models;
@@ -16,15 +17,17 @@ public class TokenRepository : ITokenRepository
 
     public async Task<TokenEntity> CreateAsync(TokenEntity tokenData)
     {
-        var sql =
-            "INSERT INTO Tokens " +
-            "(UserId, PublicToken, PublicTokenStatus, PrivateToken, PrivateTokenStatus)" +
-            " VALUES (@UserId, @PublicToken, @PublicTokenStatus, @PrivateToken, @PrivateTokenStatus) " +
-            "SET @Id = cast(scope_identity() as int) " +
-            "SELECT SCOPE_IDENTITY() AS NewId";
-
-        var newId = (int)(await db.QueryAsync(sql, tokenData)).SingleOrDefault().NewId;
-
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@Id", value: tokenData.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@UserId", tokenData.UserId);
+        parameters.Add("@PublicToken", tokenData.PublicToken);
+        parameters.Add("@PublicTokenStatus", tokenData.PublicTokenStatus);
+        parameters.Add("@PrivateToken", tokenData.PrivateToken);
+        parameters.Add("@PrivateTokenStatus", tokenData.PrivateTokenStatus);
+        
+        var newId = (await db.QueryAsync<int>("CreateToken", parameters, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+        
         tokenData.Id = newId;
 
         return tokenData;
@@ -32,21 +35,37 @@ public class TokenRepository : ITokenRepository
 
     public async Task<TokenEntity> GetByUserToken(Guid token)
     {
-        return (await db.QueryAsync<TokenEntity>("SELECT * FROM Tokens WHERE PrivateToken = @Token", new { token })).FirstOrDefault();
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@PrivateToken", token);
+
+        return (await db.QueryAsync<TokenEntity>("GetTokenByPrivateToken", parameters, commandType: CommandType.StoredProcedure)).FirstOrDefault();
     }
 
     public async Task<TokenEntity> GetByUserIdAsync(string id)
     {
-        return (await db.QueryAsync<TokenEntity>("SELECT * FROM Tokens WHERE UserId = @Id", new { id })).FirstOrDefault();
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@UserId", id);
+
+        return (await db.QueryAsync<TokenEntity>("GetTokenByUserId", parameters, commandType: CommandType.StoredProcedure)).FirstOrDefault();
     }
 
     public async Task DeleteAsync(Guid userId)
     {
-        await db.QueryAsync<TokenEntity>("DELETE FROM Tokens Where UserId = @UserId", new { UserId = userId });
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@UserId", userId);
+        
+        await db.QueryAsync<TokenEntity>("DeleteTokenByUserId", parameters, commandType: CommandType.StoredProcedure);
     }
     
     public async Task DeleteAsync(TokenEntity token)
     {
-        await db.QueryAsync<TokenEntity>("DELETE FROM Tokens Where Id = @Id", new { token.Id });
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@PrivateToken", token);
+        
+        await db.QueryAsync<TokenEntity>("DeleteTokenByPrivateToken", parameters, commandType: CommandType.StoredProcedure);
     }
 }

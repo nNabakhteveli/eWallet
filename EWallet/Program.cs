@@ -1,3 +1,4 @@
+using BetsolutionsApi;
 using EBank;
 using EWallet;
 using EWallet.Data;
