@@ -1,8 +1,8 @@
 using System.Data;
-using System.Transactions;
 using Dapper;
 using EWallet.Domain.Models;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EWallet.Domain.Data;
 
@@ -15,24 +15,18 @@ public class TransactionsRepository : ITransactionsRepository
         db = new SqlConnection(connectionString);
     }
 
-    public async Task<IEnumerable<TransactionEntity>> FilterInRange(string startDate, string endDate)
+    public async Task<IEnumerable<TransactionEntity>> FilterInRange(string startDate = "", string endDate = "")
     {
+        if (startDate.IsNullOrEmpty() || endDate.IsNullOrEmpty())
+        {
+            return await GetAllAsync();
+        }
         var parameters = new DynamicParameters();
 
         parameters.Add("@StartDate", startDate);
         parameters.Add("@EndDate", endDate);
         
-        var a = await db.QueryAsync<TransactionEntity>("GetTransactionsInRange", parameters, commandType: CommandType.StoredProcedure);
-
-        foreach (var i in a)
-        {
-            Console.WriteLine(i.CreateDate);
-            Console.WriteLine(i.Amount);
-            Console.WriteLine(i.PaymentType);
-            Console.WriteLine();
-        }
-
-        return a;
+        return await db.QueryAsync<TransactionEntity>("GetTransactionsInRange", parameters, commandType: CommandType.StoredProcedure);
     }
 
     public async Task<IEnumerable<TransactionEntity>> GetAllAsync()

@@ -1,4 +1,4 @@
-@model IEnumerable<EWallet.Domain.Models.Deposit>
+@model IEnumerable<EWallet.Domain.Models.TransactionEntity>
 
 @{
     Layout = "_Layout";
@@ -36,6 +36,9 @@
         </tr>
         </tbody>
     </table>
+    <button class="filter-btn">Filter</button>
+    <br />
+    <br />
     <table class="table" id="tbllist">
         <thead>
         <tr>

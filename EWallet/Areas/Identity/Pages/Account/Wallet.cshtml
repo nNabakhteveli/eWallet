@@ -4,7 +4,7 @@
 @inject IWalletRepository walletRepository
 @inject ITokenRepository tokenRepository
 @using EWallet.Domain.Data
-@model EWallet.Domain.Models.Deposit
+@model EWallet.Domain.Models.TransactionEntity
 
 @{
     Layout = "_Layout";
@@ -43,10 +43,6 @@
         </ul>
 
         <form class="w-75" method="POST">
-            <div class="mb-3 mt-4">
-                <label class="form-label">Recipient ID</label>
-                <input type="text" class="form-control RecipientId" id="exampleInputRecipient" placeholder="Enter an ID of the recipient">
-            </div>
             <div class="mb-3 mt-4">
                 <label class="form-label">Amount of money to deposit</label>
                 <input type="number" class="form-control Amount" id="exampleInputAmount" placeholder="Enter amount of money to deposit">
