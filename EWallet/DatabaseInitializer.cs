@@ -42,7 +42,7 @@ public class DatabaseInitializer
                 AS 
                 BEGIN
                      SELECT [Id], [UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status] 
-                    FROM [dbo].[Transactions] WHERE CreateDate BETWEEN @StartDate AND @EndDate;
+                    FROM [dbo].[Transactions] WHERE CreateDate >= @StartDate AND CreateDate < @EndDate;
                 END"
 	        );
         }
