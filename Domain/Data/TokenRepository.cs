@@ -33,7 +33,32 @@ public class TokenRepository : ITokenRepository
         return tokenData;
     }
 
-    public async Task<TokenEntity> GetByUserToken(Guid token)
+    public async Task<TokenEntity> UpdateAsync(TokenEntity tokenData)
+    {
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@Id", value: tokenData.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@UserId", tokenData.UserId);
+        parameters.Add("@PublicToken", tokenData.PublicToken);
+        parameters.Add("@PublicTokenStatus", tokenData.PublicTokenStatus);
+        parameters.Add("@PrivateToken", tokenData.PrivateToken);
+        parameters.Add("@PrivateTokenStatus", tokenData.PrivateTokenStatus);
+        
+        await db.QueryAsync<int>("UpdateTokenByPublicKey", parameters, commandType: CommandType.StoredProcedure);
+        
+        return tokenData;
+    }
+
+    public async Task<TokenEntity> GetByPublicToken(Guid token)
+    {
+        var parameters = new DynamicParameters();
+        
+        parameters.Add("@PublicToken", token);
+
+        return (await db.QueryAsync<TokenEntity>("GetTokenByPublicKey", parameters, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+    }
+
+    public async Task<TokenEntity> GetByPrivateToken(Guid token)
     {
         var parameters = new DynamicParameters();
         

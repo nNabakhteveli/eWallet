@@ -224,7 +224,53 @@ public class DatabaseInitializer
         {
             // Console.WriteLine(e);
         }
+        
+        
+        try
+        {
+	        db.Query(
+		        @"CREATE PROCEDURE [dbo].[UpdateTokenByPublicKey]
+        		@Id	int output, 
+	            @UserId varchar(200),  
+				@PublicToken varchar(200),  
+				@PublicTokenStatus varchar(100),  
+				@PrivateToken varchar(200), 
+				@PrivateTokenStatus varchar(100) 
+			    AS
+			      BEGIN
+        			UPDATE	Tokens
+        			SET		
+						UserId = @UserId,
+        				PublicToken = @PublicToken,
+        				PublicTokenStatus = @PublicTokenStatus,
+						PrivateToken = @PrivateToken,
+        				PrivateTokenStatus = @PrivateTokenStatus
+        			WHERE PublicToken = @PublicToken
+				END;"
+	        );
+        }
+        catch (Exception e)
+        {
+	        Console.WriteLine(e);
+        }
 
+        try
+        {
+	        db.Query(
+		        @"CREATE PROCEDURE [dbo].[GetTokenByPublicKey]
+					@PublicToken varchar(200)
+                    AS 
+                    BEGIN
+                        SELECT UserId, PublicToken, PublicTokenStatus, PrivateToken, PrivateTokenStatus
+                        FROM [dbo].[Tokens] WHERE PublicToken = @PublicToken;
+                    END"
+	        );
+        }
+        catch (Exception e)
+        {
+	        Console.WriteLine(e);
+        }
+        
         try
         {
 	        db.Query(

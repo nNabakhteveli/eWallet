@@ -19,20 +19,20 @@ public class AuthController : ControllerBase
     [HttpPost("/auth/auth")]
     public async Task<IActionResult> Auth(Auth auth)
     {
-        var userToken = await _tokenRepository.GetByUserIdAsync(auth.UserId);
+        var userToken = await _tokenRepository.GetByPublicToken(auth.PublicKey);
 
-        if (userToken != null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 411 });
-
-        var newToken = new TokenEntity
-        {
-            UserId = auth.UserId,
-            PublicToken = auth.PublicKey,
-            PrivateToken = Guid.NewGuid(),
-        };
-
+        if (userToken == null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 411 });
+        
         try
         {
-            await _tokenRepository.CreateAsync(newToken);
+            var newToken = new TokenEntity
+            {
+                UserId = auth.UserId,
+                PublicToken = auth.PublicKey,
+                PrivateToken = Guid.NewGuid(),
+            };
+            
+            await _tokenRepository.UpdateAsync(newToken);
             return Ok(new { newToken.PublicToken, newToken.PrivateToken });
         }
         catch (Exception)
