@@ -12,8 +12,6 @@
     var user = await UserManager.GetUserAsync(User);
     var wallet = walletRepository.GetWalletById(user.WalletId);
     var token = await tokenRepository.GetByUserIdAsync(UserManager.GetUserId(User));
-
-    var publicToken = Guid.NewGuid();
 }
 
 <div>
@@ -21,12 +19,12 @@
     {
         @if (token == null)
         {
-            <button class="btn btn-dark token-generator-btn" onclick="setPublicToken('@publicToken')">Generate token</button>
+            <button class="btn btn-dark token-generator-btn" onclick="setPublicToken('@UserManager.GetUserId(User)')">Generate token</button>
             <h2 class="public-token"></h2>
         }
         else
         {
-            <h2 class="public-token">Your public token: @token.PublicToken</h2>
+             <h2 class="public-token">Your public token: @token.PublicToken</h2>
         }
 
         <h1>@UserManager.GetUserName(User)</h1>
@@ -64,7 +62,7 @@
         @Redirect("/")
     }
 </div>
-
+  
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

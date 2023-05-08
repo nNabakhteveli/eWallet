@@ -23,7 +23,7 @@
             <a id="manage" class="nav-link text-dark" title="Wallet">Balance: $@userWallet.CurrentBalance</a>
         </li>
         <li class="nav-item">
-            <a id="manage" class="nav-link text-dark" asp-controller="Transactions" asp-action="TableView" title="Wallet">Recorded Transactions</a>
+            <a id="manage" class="nav-link text-dark" asp-controller="TransactionsTable" asp-action="TableView" title="Wallet">Recorded Transactions</a>
         </li>
         <li class="nav-item">
             <form id="logoutForm" class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">

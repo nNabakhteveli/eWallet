@@ -1,12 +1,21 @@
-function setPublicToken(token) {
-    localStorage.setItem('publicToken', token);
+function setPublicToken(userId) {
+    $.ajax({
+        type: 'POST',
+        url: '/token/generate',
+        contentType: "application/json",
+        data: JSON.stringify({ UserId: userId }),
+        success: data => {
+            if (data.success) {
+                $('.public-token').text(`Public Token: ${data.publicToken}`);
+                $('.token-generator-btn').remove();
+            } else {
+                alert("Something went wrong!..");
+            }
+        }
+    });
 }
 
 $(document).ready(() => {
-    $('.token-generator-btn').on('click', () => {
-        $('.public-token').text(`Public Token: ${localStorage.getItem('publicToken')}`);
-    });
-    
     $(".deposit-btn").on("click", (event) => {
         event.preventDefault();
 
@@ -30,14 +39,13 @@ $(document).ready(() => {
                 popup: 'colored-toast'
             },
             showConfirmButton: false,
-            timer: 2500,
+            timer: 1500,
             timerProgressBar: true
         });
 
         let currencySign = "$";
         const transaction = {
             UserId: $(".UserId").val(),
-            RecipientId: $(".RecipientId").val(),
             PaymentType: "Deposit",
             Amount: $(".Amount").val(),
             Currency: $(".Currency").val(),
