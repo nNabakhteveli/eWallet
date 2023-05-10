@@ -13,7 +13,7 @@ namespace BetsolutionsApi.Controllers
         private readonly ITokenRepository _tokenRepository;
         private readonly IWalletRepository _walletRepository;
         private readonly ITransactionsRepository _transactionsRepository;
-
+        
         public SeamlessController(ITokenRepository tokenRepository, IWalletRepository walletRepository,
             ITransactionsRepository transactionsRepository)
         {
@@ -25,7 +25,7 @@ namespace BetsolutionsApi.Controllers
         [HttpPost("Bet")]
         public async Task<IActionResult> Bet(BetRequest req)
         {
-            var userToken = await _tokenRepository.GetByUserToken(req.Token);
+            var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
@@ -62,7 +62,7 @@ namespace BetsolutionsApi.Controllers
         [HttpPost("Win")]
         public async Task<IActionResult> Win(WinRequest req)
         {
-            var userToken = await _tokenRepository.GetByUserToken(req.Token);
+            var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
@@ -98,7 +98,7 @@ namespace BetsolutionsApi.Controllers
         [HttpPost("CancelBet")]
         public async Task<IActionResult> CancelBet(CancelBet req)
         {
-            var userToken = await _tokenRepository.GetByUserToken(req.Token);
+            var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
@@ -134,7 +134,7 @@ namespace BetsolutionsApi.Controllers
         [HttpPost("ChangeWin")]
         public async Task<IActionResult> ChangeWin(ChangeWin req)
         {
-            var userToken = await _tokenRepository.GetByUserToken(req.Token);
+            var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
@@ -167,7 +167,7 @@ namespace BetsolutionsApi.Controllers
         [HttpPost("GetBalance")]
         public async Task<IActionResult> GetBalance(ChangeWin req)
         {
-            var userToken = await _tokenRepository.GetByUserToken(req.Token);
+            var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
 
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);

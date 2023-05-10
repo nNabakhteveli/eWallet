@@ -12,7 +12,7 @@ public class ApiHelper
     private readonly ITokenRepository _tokenRepository;
     private readonly IWalletRepository _walletRepository;
     private readonly ITransactionsRepository _transactionsRepository;
-
+    
     public static string GetSha256(string text)
     {
         var utf8Encoding = new UTF8Encoding();
@@ -25,6 +25,10 @@ public class ApiHelper
 
         return hashValue.Aggregate(hex, (current, bt) => current + $"{bt:x2}");
     }
+
+    public static string GetRawHash(decimal amount, string currency, int merchantId, int transactionId, string userId,
+        Guid token) =>
+        $"{amount}|{currency}|{merchantId}|{transactionId}|{token}|{userId}|{token}";
 
     public static TransferResponse GenerateTransferResponse(int statusCode, decimal balance, int transactionId = 0)
     {

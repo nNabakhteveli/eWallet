@@ -25,7 +25,7 @@ public class TransferController : ControllerBase
     public async Task<IActionResult> Deposit(TransferRequest req)
     {
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
-        var userToken = await _tokenRepository.GetByUserIdAsync(req.UserId);
+        var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
         var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
         
         if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
@@ -63,7 +63,7 @@ public class TransferController : ControllerBase
     public async Task<IActionResult> Withdraw(TransferRequest req)
     {
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
-        var userToken = await _tokenRepository.GetByUserIdAsync(req.UserId);
+        var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
         var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
         if (userWallet.CurrentBalance < req.Amount) statusCode = 407;
@@ -101,7 +101,7 @@ public class TransferController : ControllerBase
     public async Task<IActionResult> GetBalance(TransferRequest req)
     {
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
-        var userToken = await _tokenRepository.GetByUserIdAsync(req.UserId);
+        var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
 
         var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
