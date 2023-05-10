@@ -336,5 +336,22 @@ public class DatabaseInitializer
         {
             Console.WriteLine(e);
         }
+        
+        
+        try
+        {
+	        db.Query(
+		        @"CREATE PROCEDURE [dbo].[GetUserById]
+             	@UserId VARCHAR(200)
+             	AS
+             	BEGIN
+             		SELECT Id, WalletId, UserName, Email, PhoneNumber from [dbo].[AspNetUsers] WHERE Id = @UserId;
+             	END;"
+	        );
+        }
+        catch (Exception e)
+        {
+	        Console.WriteLine(e);
+        }
     }
 }

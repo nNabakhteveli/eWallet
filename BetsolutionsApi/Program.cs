@@ -7,6 +7,7 @@ var defaultConnectionString = builder.Configuration.GetConnectionString("Default
 builder.Services.AddScoped<ITokenRepository>(s => new TokenRepository(defaultConnectionString));
 builder.Services.AddScoped<IWalletRepository>(s => new WalletRepository(defaultConnectionString));
 builder.Services.AddScoped<ITransactionsRepository>(s => new TransactionsRepository(defaultConnectionString));
+builder.Services.AddScoped<IUserRepository>(s => new UserRepository(defaultConnectionString));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
