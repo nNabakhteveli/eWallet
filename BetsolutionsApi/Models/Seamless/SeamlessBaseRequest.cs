@@ -7,6 +7,7 @@ public class SeamlessBaseRequest
     public int TransactionId { get; set; }
     public int GameId { get; set; }
     public int ProductId { get; set; }
+    public string MerchantToken { get; set; }
     public int RoundId { get; set; }
     public string Hash { get; set; }
     public string Currency { get; set; }
