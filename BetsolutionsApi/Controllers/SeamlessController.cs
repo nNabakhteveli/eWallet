@@ -25,10 +25,10 @@ namespace BetsolutionsApi.Controllers
         [HttpPost("Bet")]
         public async Task<IActionResult> Bet(BetRequest req)
         {
-            var rawHash =
-                $"{req.Amount}|{req.BetTypeId}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
-
-            if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+            // var rawHash =
+            //     $"{req.Amount}|{req.BetTypeId}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
+            //
+            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
 
             var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
@@ -119,6 +119,8 @@ namespace BetsolutionsApi.Controllers
 
             if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
 
+            var oldTransaction = await _transactionsRepository.GetTransactionByIdAsync(req.BetTransactionId);
+            
             var newTransaction = new TransactionEntity
             {
                 UserId = userWallet.UserId,
@@ -129,7 +131,7 @@ namespace BetsolutionsApi.Controllers
                 Status = 1
             };
 
-            userWallet.CurrentBalance += req.Amount;
+            userWallet.CurrentBalance += oldTransaction.Amount;
 
             try
             {
@@ -160,6 +162,8 @@ namespace BetsolutionsApi.Controllers
 
             if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
 
+            var oldTransaction = await _transactionsRepository.GetTransactionByIdAsync(req.previousTransactionId);
+            
             var newTransaction = new TransactionEntity
             {
                 UserId = userWallet.UserId,
@@ -170,8 +174,12 @@ namespace BetsolutionsApi.Controllers
                 Status = 1
             };
 
+            userWallet.CurrentBalance -= oldTransaction.Amount;
+            userWallet.CurrentBalance += req.Amount;
+            
             try
             {
+                await _walletRepository.UpdateWalletAsync(userWallet);
                 var createdTransaction = await _transactionsRepository.CreateAsync(newTransaction);
 
                 return StatusCode(statusCode,

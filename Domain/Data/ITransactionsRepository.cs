@@ -8,4 +8,5 @@ public interface ITransactionsRepository
     Task<TransactionEntity> CreateAsync(TransactionEntity transaction);
     Task<TransactionEntity> UpdateAsync(TransactionEntity transaction);
     Task<IEnumerable<TransactionEntity>> GetAllAsync();
+    Task<TransactionEntity> GetTransactionByIdAsync(string id);
 }

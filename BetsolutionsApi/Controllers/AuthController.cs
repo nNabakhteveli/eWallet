@@ -10,18 +10,22 @@ namespace BetsolutionsApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly ITokenRepository _tokenRepository;
+    private readonly IUserRepository _userRepository;
 
-    public AuthController(ITokenRepository tokenRepository)
+    public AuthController(ITokenRepository tokenRepository, IUserRepository userRepository)
     {
         _tokenRepository = tokenRepository;
+        _userRepository = userRepository;
     }
 
     [HttpPost("/auth/auth")]
     public async Task<IActionResult> Auth(Auth auth)
     {
         var userToken = await _tokenRepository.GetByPublicToken(auth.PublicKey);
-
+        var user = await _userRepository.GetUserByIdAsync(auth.UserId);
+        
         if (userToken == null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 411 });
+        if (user == null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 406 });
         
         try
         {

@@ -15,18 +15,30 @@ public class TransactionsRepository : ITransactionsRepository
         db = new SqlConnection(connectionString);
     }
 
+    public async Task<TransactionEntity> GetTransactionByIdAsync(string id)
+    {
+        var parameters = new DynamicParameters();
+
+        parameters.Add("@TransactionId", id);
+
+        return (await db.QueryAsync<TransactionEntity>("GetTransactionById", parameters,
+            commandType: CommandType.StoredProcedure)).FirstOrDefault();
+    }
+
     public async Task<IEnumerable<TransactionEntity>> FilterInRange(string startDate = "", string endDate = "")
     {
         if (startDate.IsNullOrEmpty() || endDate.IsNullOrEmpty())
         {
             return await GetAllAsync();
         }
+
         var parameters = new DynamicParameters();
 
         parameters.Add("@StartDate", startDate);
         parameters.Add("@EndDate", endDate);
-        
-        return await db.QueryAsync<TransactionEntity>("GetTransactionsInRange", parameters, commandType: CommandType.StoredProcedure);
+
+        return await db.QueryAsync<TransactionEntity>("GetTransactionsInRange", parameters,
+            commandType: CommandType.StoredProcedure);
     }
 
     public async Task<IEnumerable<TransactionEntity>> GetAllAsync()

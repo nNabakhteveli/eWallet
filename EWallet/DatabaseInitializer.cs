@@ -12,6 +12,24 @@ public class DatabaseInitializer
         // Transactions
         try
         {
+	        db.Query(
+		        @"CREATE PROCEDURE [dbo].[GetTransactionById]
+             	@TransactionId varchar(200)
+             	AS
+             	BEGIN
+             		SELECT Id, UserId, PaymentType, Amount, Currency, CreateDate, Status
+					FROM Transactions WHERE Id = @TransactionId;
+             	END;"
+	        );
+        }
+        catch (Exception e)
+        {
+	        Console.WriteLine(e);
+        }
+        
+        
+        try
+        {
             db.Query(
                 @"CREATE PROCEDURE [dbo].[GetAllTransactions]
                 AS 
