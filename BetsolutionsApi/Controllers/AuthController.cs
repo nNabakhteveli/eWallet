@@ -24,8 +24,8 @@ public class AuthController : ControllerBase
         var userToken = await _tokenRepository.GetByPublicToken(auth.PublicKey);
         var user = await _userRepository.GetUserByIdAsync(auth.UserId);
         
-        if (userToken == null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 411 });
-        if (user == null) return StatusCode(StatusCodes.Status411LengthRequired, new { StatusCode = 406 });
+        if (userToken == null) return StatusCode(StatusCodes.Status411LengthRequired, CustomHttpResponses.InvalidRequest411);
+        if (user == null) return StatusCode(StatusCodes.Status406NotAcceptable, CustomHttpResponses.UserNotFound406);
         
         try
         {

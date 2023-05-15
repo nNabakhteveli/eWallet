@@ -28,14 +28,14 @@ namespace BetsolutionsApi.Controllers
             // var rawHash =
             //     $"{req.Amount}|{req.BetTypeId}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
             //
-            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
             var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
             if (userWallet.CurrentBalance < req.Amount) statusCode = 407;
-            if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
+            if (statusCode != 200) return StatusCode(statusCode, CustomHttpResponses.InvalidAmount407);
 
             var newTransaction = new TransactionEntity
             {
@@ -60,17 +60,17 @@ namespace BetsolutionsApi.Controllers
             catch (Exception)
             {
                 statusCode = 500;
-                return StatusCode(statusCode, new { statusCode });
+                return StatusCode(statusCode, CustomHttpResponses.GeneralError500);
             }
         }
 
         [HttpPost("Win")]
         public async Task<IActionResult> Win(WinRequest req)
         {
-            var rawHash =
-                $"{req.Amount}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
-
-            if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+            // var rawHash =
+            //     $"{req.Amount}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
+            //
+            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
             var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
@@ -101,17 +101,17 @@ namespace BetsolutionsApi.Controllers
             catch (Exception)
             {
                 statusCode = 500;
-                return StatusCode(statusCode, new { statusCode });
+                return StatusCode(statusCode, CustomHttpResponses.GeneralError500);
             }
         }
 
         [HttpPost("CancelBet")]
         public async Task<IActionResult> CancelBet(CancelBet req)
         {
-            var rawHash =
-                $"{req.Amount}|{req.BetTransactionId}|{req.BetTypeId}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
-
-            if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+            // var rawHash =
+            //     $"{req.Amount}|{req.BetTransactionId}|{req.BetTypeId}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
+            //
+            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
             var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
@@ -144,17 +144,17 @@ namespace BetsolutionsApi.Controllers
             catch (Exception)
             {
                 statusCode = 500;
-                return StatusCode(statusCode, new { statusCode });
+                return StatusCode(statusCode, CustomHttpResponses.GeneralError500);
             }
         }
 
         [HttpPost("ChangeWin")]
         public async Task<IActionResult> ChangeWin(ChangeWin req)
         {
-            var rawHash =
-                $"{req.Amount}|{req.ChangeWinTypeId}|{req.Currency}|{req.GameId}|{req.PreviousAmount}|{req.previousTransactionId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
-
-            if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+            // var rawHash =
+            //     $"{req.Amount}|{req.ChangeWinTypeId}|{req.Currency}|{req.GameId}|{req.PreviousAmount}|{req.previousTransactionId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
+            //
+            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
             var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);
@@ -188,16 +188,16 @@ namespace BetsolutionsApi.Controllers
             catch (Exception)
             {
                 statusCode = 500;
-                return StatusCode(statusCode, new { statusCode });
+                return StatusCode(statusCode, CustomHttpResponses.GeneralError500);
             }
         }
 
         [HttpPost("GetBalance")]
         public async Task<IActionResult> GetBalance(ChangeWin req)
         {
-            var rawHash = $"{req.Currency}|{req.GameId}|{req.ProductId}|{req.MerchantToken}|{req.Token}";
-
-            if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+            // var rawHash = $"{req.Currency}|{req.GameId}|{req.ProductId}|{req.MerchantToken}|{req.Token}";
+            //
+            // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
             var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
             var userWallet = await _walletRepository.GetWalletByUserIdAsync(userToken.UserId);

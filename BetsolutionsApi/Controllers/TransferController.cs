@@ -24,14 +24,15 @@ public class TransferController : ControllerBase
     [HttpPost("deposit")]
     public async Task<IActionResult> Deposit(TransferRequest req)
     {
-        var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
-        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+        // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
+        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
         var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
         var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
         
-        if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
+        if (statusCode == 406) return StatusCode(statusCode, CustomHttpResponses.UserNotFound406);
+        if (statusCode == 401) return StatusCode(statusCode, CustomHttpResponses.InactiveToken401);
 
         var newTransaction = new TransactionEntity
         {
@@ -58,22 +59,22 @@ public class TransferController : ControllerBase
         catch (Exception)
         {
             statusCode = 500;
-            return StatusCode(statusCode, new { statusCode });
+            return StatusCode(statusCode, CustomHttpResponses.GeneralError500);
         }
     }
 
     [HttpPost("withdraw")]
     public async Task<IActionResult> Withdraw(TransferRequest req)
     {
-        var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
-        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+        // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
+        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
         
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
         var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
         var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
         if (userWallet.CurrentBalance < req.Amount) statusCode = 407;
-        if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
+        if (statusCode != 200) return StatusCode(statusCode, CustomHttpResponses.InvalidAmount407);
 
         var newTransaction = new TransactionEntity
         {
@@ -99,15 +100,15 @@ public class TransferController : ControllerBase
         catch (Exception)
         {
             statusCode = 500;
-            return StatusCode(statusCode, new { statusCode });
+            return StatusCode(statusCode, CustomHttpResponses.GeneralError500);
         }
     }
 
     [HttpPost("GetBalance")]
     public async Task<IActionResult> GetBalance(TransferRequest req)
     {
-        var rawHash = $"{req.Currency}|{req.MerchantId}|{req.Token}|{req.UserId}|{req.Key}";
-        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+        // var rawHash = $"{req.Currency}|{req.MerchantId}|{req.Token}|{req.UserId}|{req.Key}";
+        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
         
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
         var userToken = await _tokenRepository.GetByPrivateToken(req.Token);

@@ -9,12 +9,9 @@ namespace BetsolutionsApi.Controllers;
 public class InfoController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
-    private readonly ITokenRepository _tokenRepository;
 
-
-    public InfoController(IUserRepository userRepository, ITokenRepository tokenRepository)
+    public InfoController(IUserRepository userRepository)
     {
-        _tokenRepository = tokenRepository;
         _userRepository = userRepository;
     }
 
@@ -23,11 +20,11 @@ public class InfoController : ControllerBase
     {
         var rawHash = $"{req.MerchantToken}|{req.PrivateToken}";
         
-        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, new { StatusCode = 403 });
+        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
         
         var user = await _userRepository.GetUserByIdAsync(req.Id);
 
-        if (user == null) return StatusCode(406, new { StatusCode = 406 });
+        if (user == null) return StatusCode(406, CustomHttpResponses.UserNotFound406);
 
         var response = new GetPlayerInfoResponse
         {
