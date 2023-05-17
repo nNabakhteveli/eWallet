@@ -15,7 +15,7 @@ public class TransactionsRepository : ITransactionsRepository
         db = new SqlConnection(connectionString);
     }
 
-    public async Task<TransactionEntity> GetTransactionByIdAsync(string id)
+    public async Task<TransactionEntity> GetTransactionByIdAsync(int id)
     {
         var parameters = new DynamicParameters();
 

@@ -14,7 +14,7 @@ public class DatabaseInitializer
         {
 	        db.Query(
 		        @"CREATE PROCEDURE [dbo].[GetTransactionById]
-             	@TransactionId varchar(200)
+             	@TransactionId int
              	AS
              	BEGIN
              		SELECT Id, UserId, PaymentType, Amount, Currency, CreateDate, Status
@@ -199,13 +199,15 @@ public class DatabaseInitializer
         {
             db.Query(
                 @"CREATE PROCEDURE [dbo].[UpdateWallet]
-        		@Id	int output, 
+        		@Id	int output,
+				@UserId	VARCHAR(200), 
 	            @CurrentBalance DECIMAL(10, 2) 
 			    AS
 			      BEGIN
         			UPDATE	Wallets
         			SET		
-						CurrentBalance = @CurrentBalance
+						CurrentBalance = @CurrentBalance,
+						UserId = @UserId
         			WHERE Id = @Id
 				END;"
             );

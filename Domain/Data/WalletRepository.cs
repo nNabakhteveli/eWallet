@@ -1,4 +1,5 @@
 using System.Data;
+using System.Transactions;
 using Dapper;
 using EWallet.Domain.Models;
 using Microsoft.Data.SqlClient;
@@ -14,7 +15,7 @@ public class WalletRepository : IWalletRepository
     {
         db = new SqlConnection(connectionString);
     }
-    
+
     public async Task<WalletEntity> CreateWallet(WalletEntity wallet)
     {
         var parameters = new DynamicParameters();
@@ -24,35 +25,41 @@ public class WalletRepository : IWalletRepository
 
         var newId = (await db.QueryAsync<int>("CreateWallet", parameters, commandType: CommandType.StoredProcedure))
             .SingleOrDefault();
-        
+
         wallet.Id = newId;
-        
+
         return wallet;
     }
 
     public WalletEntity GetWalletById(int id)
     {
-        var parameters = new DynamicParameters();
-        
-        parameters.Add("@Id", value: id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
-        
-        return db.Query<WalletEntity>("GetWalletById", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+        using (TransactionScope scope = new TransactionScope())
+        {
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@Id", value: id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+
+            return db.Query<WalletEntity>("GetWalletById", parameters, commandType: CommandType.StoredProcedure)
+                .SingleOrDefault();
+        }
     }
-    
+
     public async Task<WalletEntity> GetWalletByUserIdAsync(string id)
     {
         var parameters = new DynamicParameters();
-        
+
         parameters.Add("@UserId", value: id);
-        
-        return (await db.QueryAsync<WalletEntity>("GetWalletByUserId", parameters, commandType: CommandType.StoredProcedure)).SingleOrDefault();
+
+        return (await db.QueryAsync<WalletEntity>("GetWalletByUserId", parameters,
+            commandType: CommandType.StoredProcedure)).SingleOrDefault();
     }
 
     public async Task<WalletEntity> UpdateWalletAsync(WalletEntity wallet)
     {
         var parameters = new DynamicParameters();
-        
+
         parameters.Add("@Id", value: wallet.Id, dbType: DbType.Int32, direction: ParameterDirection.InputOutput);
+        parameters.Add("@UserId", wallet.UserId);
         parameters.Add("@CurrentBalance", wallet.CurrentBalance);
 
         await db.ExecuteAsync("UpdateWallet", parameters, commandType: CommandType.StoredProcedure);

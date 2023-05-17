@@ -9,20 +9,23 @@ namespace BetsolutionsApi.Controllers;
 public class InfoController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
+    private readonly ITokenRepository _tokenRepository;
 
-    public InfoController(IUserRepository userRepository)
+    public InfoController(IUserRepository userRepository, ITokenRepository tokenRepository)
     {
         _userRepository = userRepository;
+        _tokenRepository = tokenRepository;
     }
 
     [HttpPost("GetPlayerInfo")]
     public async Task<IActionResult> GetPlayerInfo(GetPlayerInfoRequest req)
     {
-        var rawHash = $"{req.MerchantToken}|{req.PrivateToken}";
-        
-        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
-        
-        var user = await _userRepository.GetUserByIdAsync(req.Id);
+        // var rawHash = $"{req.MerchantToken}|{req.PrivateToken}";
+        //
+        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
+
+        var tokenData = await _tokenRepository.GetByPrivateToken(req.PrivateToken); 
+        var user = await _userRepository.GetUserByIdAsync(tokenData.UserId);
 
         if (user == null) return StatusCode(406, CustomHttpResponses.UserNotFound406);
 
@@ -31,7 +34,7 @@ public class InfoController : ControllerBase
             StatusCode = 200,
             Data = new PlayerData
             {
-                Id = req.Id,
+                Id = user.Id,
                 WalletId = user.WalletId,
                 UserName = user.UserName,
                 Email = user.Email,
