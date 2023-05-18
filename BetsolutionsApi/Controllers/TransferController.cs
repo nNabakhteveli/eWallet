@@ -22,7 +22,7 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost("deposit")]
-    public async Task<IActionResult> Deposit(TransferRequest req)
+    public async Task<IActionResult> Deposit([FromForm] TransferRequest req)
     {
         // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
         // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
@@ -64,7 +64,7 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost("withdraw")]
-    public async Task<IActionResult> Withdraw(TransferRequest req)
+    public async Task<IActionResult> Withdraw([FromForm] TransferRequest req)
     {
         // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
         // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
@@ -105,7 +105,7 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost("GetBalance")]
-    public async Task<IActionResult> GetBalance(TransferRequest req)
+    public async Task<IActionResult> GetBalance([FromForm] TransferRequest req)
     {
         // var rawHash = $"{req.Currency}|{req.MerchantId}|{req.Token}|{req.UserId}|{req.Key}";
         // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);

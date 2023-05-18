@@ -19,7 +19,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("/auth/auth")]
-    public async Task<IActionResult> Auth(Auth auth)
+    public async Task<IActionResult> Auth([FromForm] Auth auth)
     {
         var userToken = await _tokenRepository.GetByPublicToken(auth.PublicKey);
         var user = await _userRepository.GetUserByIdAsync(auth.UserId);

@@ -18,7 +18,7 @@ public class InfoController : ControllerBase
     }
 
     [HttpPost("GetPlayerInfo")]
-    public async Task<IActionResult> GetPlayerInfo(GetPlayerInfoRequest req)
+    public async Task<IActionResult> GetPlayerInfo([FromForm] GetPlayerInfoRequest req)
     {
         // var rawHash = $"{req.MerchantToken}|{req.PrivateToken}";
         //

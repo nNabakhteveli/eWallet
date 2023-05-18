@@ -23,7 +23,7 @@ namespace BetsolutionsApi.Controllers
         }
 
         [HttpPost("Bet")]
-        public async Task<IActionResult> Bet(BetRequest req)
+        public async Task<IActionResult> Bet([FromForm] BetRequest req)
         {
             // var rawHash =
             //     $"{req.Amount}|{req.BetTypeId}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
@@ -65,7 +65,7 @@ namespace BetsolutionsApi.Controllers
         }
 
         [HttpPost("Win")]
-        public async Task<IActionResult> Win(WinRequest req)
+        public async Task<IActionResult> Win([FromForm] WinRequest req)
         {
             // var rawHash =
             //     $"{req.Amount}|{req.CampaignId}|{req.CampaignName}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
@@ -106,7 +106,7 @@ namespace BetsolutionsApi.Controllers
         }
 
         [HttpPost("CancelBet")]
-        public async Task<IActionResult> CancelBet(CancelBet req)
+        public async Task<IActionResult> CancelBet([FromForm] CancelBet req)
         {
             // var rawHash =
             //     $"{req.Amount}|{req.BetTransactionId}|{req.BetTypeId}|{req.Currency}|{req.GameId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
@@ -149,7 +149,7 @@ namespace BetsolutionsApi.Controllers
         }
 
         [HttpPost("ChangeWin")]
-        public async Task<IActionResult> ChangeWin(ChangeWin req)
+        public async Task<IActionResult> ChangeWin([FromForm] ChangeWin req)
         {
             // var rawHash =
             //     $"{req.Amount}|{req.ChangeWinTypeId}|{req.Currency}|{req.GameId}|{req.PreviousAmount}|{req.previousTransactionId}|{req.ProductId}|{req.RoundId}|{req.MerchantToken}|{req.TransactionId}|{req.Token}";
@@ -193,7 +193,7 @@ namespace BetsolutionsApi.Controllers
         }
 
         [HttpPost("GetBalance")]
-        public async Task<IActionResult> GetBalance(ChangeWin req)
+        public async Task<IActionResult> GetBalance([FromForm] ChangeWin req)
         {
             // var rawHash = $"{req.Currency}|{req.GameId}|{req.ProductId}|{req.MerchantToken}|{req.Token}";
             //
