@@ -8,7 +8,7 @@ public class DatabaseInitializer
     public static void AddStoredProcedures(string connectionStr)
     {
         var db = new SqlConnection(connectionStr);
-        
+
         try
         {
             db.Query(
@@ -46,6 +46,209 @@ public class DatabaseInitializer
 						SELECT @NewCurrentBalance = CurrentBalance From Wallets WHERE UserId = @UserId
 						
 						SELECT @NewTransactionId, @NewCurrentBalance;
+					END"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+        try
+        {
+            db.Query(
+                @"
+					CREATE PROCEDURE dbo.Win
+					@Token VARCHAR(200),  
+					@PaymentType varchar(10), 	
+					@Amount	DECIMAL(10, 2), 
+					@Currency	varchar(10), 
+					@CreateDate smalldatetime, 
+					@TransactionId int, 
+					@Status int 
+					AS 
+					BEGIN
+						DECLARE @UserId VARCHAR(200)
+						DECLARE @NewTransactionId int;
+						DECLARE @NewCurrentBalance DECIMAL(10, 2)
+						DECLARE @IsAlreadyProcessed int
+						
+						SET @IsAlreadyProcessed = 0;
+
+						SELECT @IsAlreadyProcessed = Id from Transactions WHERE Id = @TransactionId
+						
+						IF @IsAlreadyProcessed = 0
+						BEGIN
+						   
+							SELECT @UserId = UserId FROM Tokens WHERE PrivateToken = @Token
+							
+							SET IDENTITY_INSERT Transactions ON
+							
+							INSERT INTO dbo.Transactions
+						    ([Id], [UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status])
+							VALUES
+						        (@TransactionId,
+						        @UserId, 
+						        @PaymentType, 
+						        @Amount,
+						        @Currency,
+								@CreateDate,
+								@Status)
+							SET @NewTransactionId = SCOPE_IDENTITY()
+						
+						   
+							UPDATE dbo.Wallets
+							SET CurrentBalance = CurrentBalance + @Amount
+							WHERE UserId = @UserId
+							
+							
+							SELECT @NewCurrentBalance = CurrentBalance From Wallets WHERE UserId = @UserId
+							
+							
+							SELECT @NewTransactionId, @NewCurrentBalance;
+						END
+					END"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+        try
+        {
+            db.Query(
+                @"
+				CREATE PROCEDURE dbo.CancelBet
+				@Token VARCHAR(200),  
+				@PaymentType varchar(10), 	
+				@Amount	DECIMAL(10, 2), 
+				@Currency	varchar(10), 
+				@CreateDate smalldatetime,
+				@OldTransactionId int,
+				@TransactionId int,
+				@Status int 
+				AS 
+				BEGIN
+					DECLARE @UserId VARCHAR(200)
+					DECLARE @NewTransactionId int;
+					DECLARE @OldAmount DECIMAL(10, 2)
+					DECLARE @NewCurrentBalance DECIMAL(10, 2)
+					DECLARE @IsAlreadyProcessed int
+					
+					SET @IsAlreadyProcessed = 0;
+
+					SELECT @IsAlreadyProcessed = Id from Transactions WHERE Id = @TransactionId
+					
+					IF @IsAlreadyProcessed = 0
+					BEGIN
+						SELECT @UserId = UserId FROM Tokens WHERE PrivateToken = @Token
+						
+						SET IDENTITY_INSERT Transactions ON
+						
+						INSERT INTO dbo.Transactions
+					    ([Id], [UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status])
+						VALUES
+					        (@TransactionId,
+					        @UserId, 
+					        @PaymentType, 
+					        @Amount,
+					        @Currency,
+							@CreateDate,
+							@Status)
+						SET @NewTransactionId = SCOPE_IDENTITY()
+					
+	   					SELECT @OldAmount = Amount FROM Transactions WHERE Id = @OldTransactionId
+						
+						
+						UPDATE dbo.Wallets
+						SET CurrentBalance = CurrentBalance + @OldAmount
+						WHERE UserId = @UserId
+						
+						
+						SELECT @NewCurrentBalance = CurrentBalance FROM Wallets WHERE UserId = @UserId
+						
+						
+						SELECT @NewTransactionId, @NewCurrentBalance;
+					END
+				END"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        try
+        {
+            db.Query(
+                @"
+					CREATE PROCEDURE dbo.ChangeWin
+					@Token VARCHAR(200),  
+					@PaymentType varchar(10), 	
+					@Amount	DECIMAL(10, 2), 
+					@Currency	varchar(10), 
+					@CreateDate smalldatetime,
+					@OldTransactionId int,
+					@Status int 
+					AS 
+					BEGIN
+						DECLARE @UserId VARCHAR(200)
+						DECLARE @NewTransactionId int;
+						DECLARE @OldAmount DECIMAL(10, 2)
+						DECLARE @NewCurrentBalance DECIMAL(10, 2)
+					   
+						SELECT @UserId = UserId FROM Tokens WHERE PrivateToken = @Token
+						
+						INSERT INTO dbo.Transactions
+					    ([UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status])
+						VALUES
+					        (@UserId, 
+					        @PaymentType, 
+					        @Amount,
+					        @Currency,
+							@CreateDate,
+							@Status)
+						SET @NewTransactionId = SCOPE_IDENTITY()
+
+   						SELECT @OldAmount = Amount FROM Transactions WHERE Id = @OldTransactionId
+						
+						
+						UPDATE dbo.Wallets
+						SET CurrentBalance = CurrentBalance - @OldAmount + @Amount
+						WHERE UserId = @UserId
+						
+						
+						SELECT @NewCurrentBalance = CurrentBalance FROM Wallets WHERE UserId = @UserId
+						
+						
+						SELECT @NewTransactionId, @NewCurrentBalance;
+					END"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        try
+        {
+            db.Query(
+                @"
+					CREATE PROCEDURE dbo.GetBalance
+					@Token VARCHAR(200)
+					AS
+					BEGIN
+						DECLARE @UserId VARCHAR(200)
+						DECLARE @CurrentBalance DECIMAL(10, 2)
+						
+						SELECT @UserId = UserId FROM Tokens WHERE PrivateToken = @Token
+						
+						SELECT @CurrentBalance = CurrentBalance FROM Wallets WHERE UserId = @UserId
+						
+						SELECT @CurrentBalance
 					END"
             );
         }
