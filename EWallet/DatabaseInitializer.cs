@@ -8,26 +8,72 @@ public class DatabaseInitializer
     public static void AddStoredProcedures(string connectionStr)
     {
         var db = new SqlConnection(connectionStr);
+        
+        try
+        {
+            db.Query(
+                @"
+					CREATE PROCEDURE dbo.Bet
+					@Token VARCHAR(200),  
+					@PaymentType varchar(10), 	
+					@Amount	DECIMAL(10, 2), 
+					@Currency	varchar(10), 
+					@CreateDate smalldatetime,  
+					@Status int 
+					AS 
+					BEGIN
+						DECLARE @UserId VARCHAR(200)
+						DECLARE @NewTransactionId int;
+						DECLARE @NewCurrentBalance DECIMAL(10, 2)
+					   
+						SELECT @UserId = UserId FROM Tokens WHERE PrivateToken = @Token
+						
+						INSERT INTO dbo.Transactions
+					    ([UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status])
+						VALUES
+					        (@UserId, 
+					        @PaymentType, 
+					        @Amount,
+					        @Currency,
+							@CreateDate,
+							@Status)
+						SET @NewTransactionId = SCOPE_IDENTITY()
+
+						UPDATE dbo.Wallets
+						SET CurrentBalance = CurrentBalance - @Amount
+						WHERE UserId = @UserId						
+						
+						SELECT @NewCurrentBalance = CurrentBalance From Wallets WHERE UserId = @UserId
+						
+						SELECT @NewTransactionId, @NewCurrentBalance;
+					END"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
 
         // Transactions
         try
         {
-	        db.Query(
-		        @"CREATE PROCEDURE [dbo].[GetTransactionById]
+            db.Query(
+                @"CREATE PROCEDURE [dbo].[GetTransactionById]
              	@TransactionId int
              	AS
              	BEGIN
              		SELECT Id, UserId, PaymentType, Amount, Currency, CreateDate, Status
 					FROM Transactions WHERE Id = @TransactionId;
              	END;"
-	        );
+            );
         }
         catch (Exception e)
         {
-	        Console.WriteLine(e);
+            Console.WriteLine(e);
         }
-        
-        
+
+
         try
         {
             db.Query(
@@ -53,8 +99,8 @@ public class DatabaseInitializer
 
         try
         {
-	        db.Query(
-		        @"CREATE PROCEDURE [dbo].[GetTransactionsInRange]
+            db.Query(
+                @"CREATE PROCEDURE [dbo].[GetTransactionsInRange]
 				@StartDate varchar(50), 
 				@EndDate varchar(50)
                 AS 
@@ -62,12 +108,12 @@ public class DatabaseInitializer
                      SELECT [Id], [UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status] 
                     FROM [dbo].[Transactions] WHERE CreateDate >= @StartDate AND CreateDate < @EndDate;
                 END"
-	        );
+            );
         }
         catch (Exception e)
         {
-	        // Console.WriteLine(e);
-	        // Console.WriteLine();
+            // Console.WriteLine(e);
+            // Console.WriteLine();
         }
 
         try
@@ -244,12 +290,12 @@ public class DatabaseInitializer
         {
             // Console.WriteLine(e);
         }
-        
-        
+
+
         try
         {
-	        db.Query(
-		        @"CREATE PROCEDURE [dbo].[UpdateTokenByPublicKey]
+            db.Query(
+                @"CREATE PROCEDURE [dbo].[UpdateTokenByPublicKey]
         		@Id	int output, 
 	            @UserId varchar(200),  
 				@PublicToken varchar(200),  
@@ -267,47 +313,47 @@ public class DatabaseInitializer
         				PrivateTokenStatus = @PrivateTokenStatus
         			WHERE PublicToken = @PublicToken
 				END;"
-	        );
+            );
         }
         catch (Exception e)
         {
-	        Console.WriteLine(e);
+            Console.WriteLine(e);
         }
 
         try
         {
-	        db.Query(
-		        @"CREATE PROCEDURE [dbo].[GetTokenByPublicKey]
+            db.Query(
+                @"CREATE PROCEDURE [dbo].[GetTokenByPublicKey]
 					@PublicToken varchar(200)
                     AS 
                     BEGIN
                         SELECT UserId, PublicToken, PublicTokenStatus, PrivateToken, PrivateTokenStatus
                         FROM [dbo].[Tokens] WHERE PublicToken = @PublicToken;
                     END"
-	        );
+            );
         }
         catch (Exception e)
         {
-	        Console.WriteLine(e);
+            Console.WriteLine(e);
         }
-        
+
         try
         {
-	        db.Query(
-		        @"CREATE PROCEDURE [dbo].[GetTokenByPrivateToken]
+            db.Query(
+                @"CREATE PROCEDURE [dbo].[GetTokenByPrivateToken]
 					@PrivateToken varchar(200)
                     AS 
                     BEGIN
                         SELECT UserId, PublicToken, PublicTokenStatus, PrivateToken, PrivateTokenStatus
                         FROM [dbo].[Tokens] WHERE PrivateToken = @PrivateToken;
                     END"
-	        );
+            );
         }
         catch (Exception e)
         {
-	        Console.WriteLine(e);
+            Console.WriteLine(e);
         }
-        
+
         try
         {
             db.Query(
@@ -356,22 +402,22 @@ public class DatabaseInitializer
         {
             Console.WriteLine(e);
         }
-        
-        
+
+
         try
         {
-	        db.Query(
-		        @"CREATE PROCEDURE [dbo].[GetUserById]
+            db.Query(
+                @"CREATE PROCEDURE [dbo].[GetUserById]
              	@UserId VARCHAR(200)
              	AS
              	BEGIN
              		SELECT Id, WalletId, UserName, Email, PhoneNumber from [dbo].[AspNetUsers] WHERE Id = @UserId;
              	END;"
-	        );
+            );
         }
         catch (Exception e)
         {
-	        Console.WriteLine(e);
+            Console.WriteLine(e);
         }
     }
 }

@@ -22,6 +22,7 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost("deposit")]
+    [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> Deposit([FromForm] TransferRequest req)
     {
         // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
@@ -64,6 +65,7 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost("withdraw")]
+    [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> Withdraw([FromForm] TransferRequest req)
     {
         // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
@@ -105,6 +107,7 @@ public class TransferController : ControllerBase
     }
 
     [HttpPost("GetBalance")]
+    [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> GetBalance([FromForm] TransferRequest req)
     {
         // var rawHash = $"{req.Currency}|{req.MerchantId}|{req.Token}|{req.UserId}|{req.Key}";

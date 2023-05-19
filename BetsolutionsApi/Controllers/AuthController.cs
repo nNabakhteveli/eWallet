@@ -19,6 +19,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("/auth/auth")]
+    [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> Auth([FromForm] Auth auth)
     {
         var userToken = await _tokenRepository.GetByPublicToken(auth.PublicKey);
