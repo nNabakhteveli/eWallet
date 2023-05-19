@@ -4,9 +4,9 @@ namespace EWallet.Domain.Data;
 
 public interface ISeamlessRepository
 {
-    Task<BetResult> Bet(SeamlessBetRequest req);
-    Task<BetResult> Win(SeamlessBetRequest req);
-    Task<BetResult> CancelBet(SeamlessCancelBetRequest req);
-    Task<BetResult> ChangeWin(SeamlessCancelBetRequest req);
-    Task<BetResult> GetBalance(SeamlessBetRequest req);
+    BetResult Bet(SeamlessBetRequest req); 
+    BetResult Win(SeamlessBetRequest req);
+    BetResult CancelBet(SeamlessCancelBetRequest req);
+    BetResult ChangeWin(SeamlessCancelBetRequest req);
+    BetResult GetBalance(SeamlessBetRequest req);
 }

@@ -2,6 +2,12 @@ namespace BetsolutionsApi;
 
 public static class CustomHttpResponses
 {
+    public static object AlreadyProcessed201 { get; } = new
+    {
+        StatusCode = 201,
+        message = "Already Processed Transaction"
+    };
+    
     public static object InactiveToken401 { get; } = new
     {
         StatusCode = 401,

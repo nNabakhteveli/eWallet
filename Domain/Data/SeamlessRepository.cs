@@ -12,9 +12,8 @@ public class SeamlessRepository : ISeamlessRepository
     {
         connectionString = connString;
     }
-
-    // DONT FORGET TO ADD TRANSACTION ID CHECKING
-    public async Task<BetResult> Bet(SeamlessBetRequest req)
+    
+    public BetResult Bet(SeamlessBetRequest req)
     {
         var result = new BetResult();
 
@@ -55,7 +54,7 @@ public class SeamlessRepository : ISeamlessRepository
         return result;
     }
 
-    public async Task<BetResult> Win(SeamlessBetRequest req)
+    public BetResult Win(SeamlessBetRequest req)
     {
         var result = new BetResult();
 
@@ -67,6 +66,7 @@ public class SeamlessRepository : ISeamlessRepository
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.Add(new SqlParameter("@Token", req.Token));
+            cmd.Parameters.Add(new SqlParameter("@TransactionId", req.TransactionId));
             cmd.Parameters.Add(new SqlParameter("@Amount", req.Amount));
             cmd.Parameters.Add(new SqlParameter("@PaymentType", req.PaymentType));
             cmd.Parameters.Add(new SqlParameter("@Currency", req.Currency));
@@ -84,6 +84,9 @@ public class SeamlessRepository : ISeamlessRepository
 
                         return result;
                     }
+                    // If there isn't any data to read, it means that duplicate transaction error occurs
+                    result.IsDuplicateTransaction = true;
+                    return result;
                 }
             }
             catch (Exception e)
@@ -92,11 +95,9 @@ public class SeamlessRepository : ISeamlessRepository
                 return result;
             }
         }
-
-        return result;
     }
 
-    public async Task<BetResult> CancelBet(SeamlessCancelBetRequest req)
+    public BetResult CancelBet(SeamlessCancelBetRequest req)
     {
         var result = new BetResult();
 
@@ -109,6 +110,7 @@ public class SeamlessRepository : ISeamlessRepository
 
             cmd.Parameters.Add(new SqlParameter("@Token", req.Token));
             cmd.Parameters.Add(new SqlParameter("@OldTransactionId", req.OldTransactionId));
+            cmd.Parameters.Add(new SqlParameter("@TransactionId", req.TransactionId));
             cmd.Parameters.Add(new SqlParameter("@Amount", req.Amount));
             cmd.Parameters.Add(new SqlParameter("@PaymentType", req.PaymentType));
             cmd.Parameters.Add(new SqlParameter("@Currency", req.Currency));
@@ -126,6 +128,9 @@ public class SeamlessRepository : ISeamlessRepository
 
                         return result;
                     }
+                    // If there isn't any data to read, it means that duplicate transaction error occurs
+                    result.IsDuplicateTransaction = true;
+                    return result;
                 }
             }
             catch (Exception e)
@@ -134,12 +139,10 @@ public class SeamlessRepository : ISeamlessRepository
                 return result;
             }
         }
-
-        return result;
     }
-    
-    
-    public async Task<BetResult> ChangeWin(SeamlessCancelBetRequest req)
+
+
+    public BetResult ChangeWin(SeamlessCancelBetRequest req)
     {
         var result = new BetResult();
 
@@ -177,11 +180,10 @@ public class SeamlessRepository : ISeamlessRepository
                 return result;
             }
         }
-
         return result;
     }
-    
-    public async Task<BetResult> GetBalance(SeamlessBetRequest req)
+
+    public BetResult GetBalance(SeamlessBetRequest req)
     {
         var result = new BetResult
         {
@@ -196,7 +198,7 @@ public class SeamlessRepository : ISeamlessRepository
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.Add(new SqlParameter("@Token", req.Token));
-            
+
             try
             {
                 using (SqlDataReader rdr = cmd.ExecuteReader())
@@ -216,8 +218,6 @@ public class SeamlessRepository : ISeamlessRepository
                 return result;
             }
         }
-
         return result;
     }
-    
 }
