@@ -1,6 +1,7 @@
 using EBank;
 using EWallet.Domain.Data;
 using EWallet.Domain.Models;
+using EWallet.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EWallet.Controllers;
@@ -30,29 +31,53 @@ public class MoneyTransferController : Controller
             transaction.Status = 2;
 
             await _transactionsRepository.CreateAsync(transaction);
-            return Json(new { success = false });
+            return Json(new { Success = false });
         }
 
         var createdTransaction = await _transactionsRepository.CreateAsync(transaction);
 
+        
+
+        return Json(new { Success = true, Amount = createdTransaction.Amount ,TransactionId = createdTransaction.Id });
+    }
+    
+    [HttpPost]
+    [Route("/Transactions/Api/AcceptDeposit")]
+    public async Task<JsonResult> AcceptedDeposit(Deposit transaction)
+    {
+        var oldTransaction = await _transactionsRepository.GetTransactionByIdAsync(transaction.TransactionId);
+        
         // imitation of a bank
         var transactionStatus = _bank.ValidateTransfer();
-        createdTransaction.Status = transactionStatus;
+        oldTransaction.Status = transactionStatus;
         
-        await _transactionsRepository.UpdateAsync(createdTransaction);
+        await _transactionsRepository.UpdateAsync(oldTransaction);
         
         var success = false;
         if (transactionStatus == 1)
         {
             success = true;
-            var userWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.UserId);
-
-            userWallet.CurrentBalance += transaction.Amount;
+            var userWallet = await _walletRepository.GetWalletByUserIdAsync(oldTransaction.UserId);
+        
+            userWallet.CurrentBalance += oldTransaction.Amount;
             await _walletRepository.UpdateWalletAsync(userWallet);
         }
-
+        
         return Json(new { success });
     }
+    
+    [HttpPost]
+    [Route("/Transactions/Api/RejectDeposit")]
+    public async Task<JsonResult> RejectDeposit(Deposit transaction)
+    {
+        var oldTransaction = await _transactionsRepository.GetTransactionByIdAsync(transaction.TransactionId);
+
+        oldTransaction.Status = 2;
+        await _transactionsRepository.UpdateAsync(oldTransaction);
+        
+        return Json(new { success = true });
+    }
+    
 
     [HttpPost]
     [Route("/Transactions/Api/Withdraw")]

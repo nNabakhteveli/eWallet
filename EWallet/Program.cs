@@ -1,6 +1,5 @@
 using BetsolutionsApi;
 using EBank;
-using EWallet;
 using EWallet.Data;
 using EWallet.Domain.Data;
 using EWallet.Domain.Models;
@@ -18,10 +17,7 @@ builder.Services.AddScoped<ITokenRepository>(s => new TokenRepository(defaultCon
 
 builder.Services.AddScoped<IEBank, EBank.EBank>();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-{
-    options.UseSqlServer(defaultConnectionString);
-});
+builder.Services.AddDbContext<ApplicationDbContext>(options => { options.UseSqlServer(defaultConnectionString); });
 
 builder.Services.AddDefaultIdentity<UserEntity>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<ApplicationDbContext>();
