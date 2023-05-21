@@ -13,7 +13,9 @@ $(document).ready(() => {
             url: 'https://localhost:7039/Transactions/Api/AcceptDeposit',
             data: { success: true, transactionId: transactionId},
             success: data => {
-                window.location.href = `https://localhost:7039/Identity/Account/Wallet?success=true&amount=${amount}`;
+                const success = data.success === true ? true : false;
+                
+                window.location.href = `https://localhost:7039/Identity/Account/Wallet?success=${success}&amount=${amount}`;
             }
         });
     });
