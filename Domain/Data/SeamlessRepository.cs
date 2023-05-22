@@ -97,7 +97,7 @@ public class SeamlessRepository : ISeamlessRepository
         }
     }
 
-    public BetResult CancelBet(SeamlessCancelBetRequest req)
+    public async Task<BetResult> CancelBet(SeamlessCancelBetRequest req)
     {
         var result = new BetResult();
 
@@ -142,7 +142,7 @@ public class SeamlessRepository : ISeamlessRepository
     }
 
 
-    public BetResult ChangeWin(SeamlessCancelBetRequest req)
+    public async Task<BetResult> ChangeWin(SeamlessCancelBetRequest req)
     {
         var result = new BetResult();
 
@@ -183,7 +183,7 @@ public class SeamlessRepository : ISeamlessRepository
         return result;
     }
 
-    public BetResult GetBalance(SeamlessBetRequest req)
+    public async Task<BetResult> GetBalance(SeamlessBetRequest req)
     {
         var result = new BetResult
         {

@@ -11,15 +11,13 @@ namespace BetsolutionsApi.Controllers
     {
         private readonly ITokenRepository _tokenRepository;
         private readonly IWalletRepository _walletRepository;
-        private readonly ITransactionsRepository _transactionsRepository;
         private readonly ISeamlessRepository _seamlessRepository;
 
         public SeamlessController(ITokenRepository tokenRepository, IWalletRepository walletRepository,
-            ITransactionsRepository transactionsRepository, ISeamlessRepository seamlessRepository)
+            ISeamlessRepository seamlessRepository)
         {
             _tokenRepository = tokenRepository;
             _walletRepository = walletRepository;
-            _transactionsRepository = transactionsRepository;
             _seamlessRepository = seamlessRepository;
         }
 
@@ -38,7 +36,7 @@ namespace BetsolutionsApi.Controllers
 
             if (userWallet.CurrentBalance < req.Amount) statusCode = 407;
             if (statusCode != 200) return StatusCode(statusCode, CustomHttpResponses.InvalidAmount407);
-            
+
             var request = new SeamlessBetRequest
             {
                 Token = req.Token,
@@ -50,13 +48,13 @@ namespace BetsolutionsApi.Controllers
             };
 
             var result = _seamlessRepository.Bet(request);
-            
+
             if (result.TransactionId != 0)
             {
                 return StatusCode(statusCode,
-                ApiHelper.GenerateTransferResponse(statusCode, result.CurrentAmount, result.TransactionId));
+                    ApiHelper.GenerateTransferResponse(statusCode, result.CurrentAmount, result.TransactionId));
             }
-            
+
             return StatusCode(500, CustomHttpResponses.GeneralError500);
         }
 
@@ -74,7 +72,7 @@ namespace BetsolutionsApi.Controllers
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
             if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
-            
+
             var newTransaction = new SeamlessBetRequest
             {
                 Token = req.Token,
@@ -87,15 +85,15 @@ namespace BetsolutionsApi.Controllers
             };
 
             var result = _seamlessRepository.Win(newTransaction);
-            
+
             if (result.TransactionId != 0)
             {
                 return StatusCode(statusCode,
                     ApiHelper.GenerateTransferResponse(statusCode, result.CurrentAmount, result.TransactionId));
             }
-            
+
             if (result.IsDuplicateTransaction) return StatusCode(201, CustomHttpResponses.AlreadyProcessed201);
-            
+
             return StatusCode(500, CustomHttpResponses.GeneralError500);
         }
 
@@ -113,7 +111,7 @@ namespace BetsolutionsApi.Controllers
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
             if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
-            
+
             var newTransaction = new SeamlessCancelBetRequest
             {
                 Token = req.Token,
@@ -123,20 +121,20 @@ namespace BetsolutionsApi.Controllers
                 CreateDate = DateTime.Now,
                 TransactionId = req.TransactionId,
                 OldTransactionId = req.BetTransactionId,
-                
+
                 Status = 1
             };
 
-            var result = _seamlessRepository.CancelBet(newTransaction);
-            
+            var result = await _seamlessRepository.CancelBet(newTransaction);
+
             if (result.TransactionId != 0)
             {
                 return StatusCode(statusCode,
                     ApiHelper.GenerateTransferResponse(statusCode, result.CurrentAmount, result.TransactionId));
             }
-            
+
             if (result.IsDuplicateTransaction) return StatusCode(201, CustomHttpResponses.AlreadyProcessed201);
-            
+
             return StatusCode(500, CustomHttpResponses.GeneralError500);
         }
 
@@ -154,7 +152,7 @@ namespace BetsolutionsApi.Controllers
             var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
 
             if (statusCode != 200) return StatusCode(statusCode, new { statusCode });
-            
+
             var newTransaction = new SeamlessCancelBetRequest
             {
                 Token = req.Token,
@@ -166,14 +164,14 @@ namespace BetsolutionsApi.Controllers
                 Status = 1
             };
 
-            var result = _seamlessRepository.ChangeWin(newTransaction);
-            
+            var result = await _seamlessRepository.ChangeWin(newTransaction);
+
             if (result.TransactionId != 0)
             {
                 return StatusCode(statusCode,
                     ApiHelper.GenerateTransferResponse(statusCode, result.CurrentAmount, result.TransactionId));
             }
-            
+
             return StatusCode(500, CustomHttpResponses.GeneralError500);
         }
 
@@ -184,20 +182,20 @@ namespace BetsolutionsApi.Controllers
             // var rawHash = $"{req.Currency}|{req.GameId}|{req.ProductId}|{req.MerchantToken}|{req.Token}";
             //
             // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
-            
+
             var request = new SeamlessBetRequest
             {
-                Token = req.Token 
+                Token = req.Token
             };
-            
-            var result = _seamlessRepository.GetBalance(request);
+
+            var result = await _seamlessRepository.GetBalance(request);
 
             if (result.TransactionId == 0)
             {
                 return StatusCode(200,
                     ApiHelper.GenerateTransferResponse(200, result.CurrentAmount, result.TransactionId));
             }
-            
+
             return StatusCode(500, CustomHttpResponses.GeneralError500);
         }
     }

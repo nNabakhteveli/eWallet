@@ -352,8 +352,7 @@ public class DatabaseInitializer
 						
 						SELECT @NewTransactionId, @NewCurrentBalance;
 					END
-				END"
-            );
+				END");
         }
         catch (Exception e)
         {
