@@ -9,10 +9,37 @@ namespace EWallet.Domain.Data;
 public class TransactionsRepository : ITransactionsRepository
 {
     private IDbConnection db;
+    private string connectionString;
 
     public TransactionsRepository(string connectionString)
     {
         db = new SqlConnection(connectionString);
+        this.connectionString = connectionString;
+    }
+
+    public async Task AcceptDeposit(int transactionId, int status)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand("AcceptDeposit", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            
+            cmd.Parameters.Add(new SqlParameter("@TransactionId", transactionId));
+            cmd.Parameters.Add(new SqlParameter("@Status", status));
+
+            try
+            {
+                using (SqlDataReader rdr = cmd.ExecuteReader())
+                {
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
     }
 
     public async Task<TransactionEntity> GetTransactionByIdAsync(int id)

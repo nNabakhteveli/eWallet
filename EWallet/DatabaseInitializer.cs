@@ -11,6 +11,53 @@ public class DatabaseInitializer
 
         try
         {
+	        db.Query(@"
+				CREATE PROCEDURE dbo.AcceptDeposit   
+				@TransactionId int,
+				@Status int
+				AS 
+				BEGIN
+					DECLARE @NewTransactionId int;
+					DECLARE @NewCurrentBalance DECIMAL(10, 2)
+					DECLARE @UserId VARCHAR(200)
+					DECLARE @AmountToAdd DECIMAL(10, 2)
+					DECLARE @IsAlreadyProcessed int
+					
+					SET @IsAlreadyProcessed = 0;
+
+					SELECT @IsAlreadyProcessed = Status, @UserId = UserId, @AmountToAdd = Amount from Transactions WHERE Id = @TransactionId
+					
+					IF @IsAlreadyProcessed = 0
+					BEGIN
+						UPDATE Transactions
+        					SET		
+								Status = @Status
+							WHERE Id = @TransactionId
+					
+						
+						IF @Status = 1
+						BEGIN
+							UPDATE dbo.Wallets
+							SET CurrentBalance = CurrentBalance + @AmountToAdd
+							WHERE UserId = @UserId
+						END
+						
+						
+						SELECT @NewCurrentBalance = CurrentBalance From Wallets WHERE UserId = @UserId
+						
+						
+						SELECT @NewTransactionId, @NewCurrentBalance;
+					END
+				END
+			");
+        }
+        catch (Exception e)
+        {
+	        Console.WriteLine(e);
+        }
+        
+        try
+        {
             db.Query(
                 @"
 					CREATE PROCEDURE dbo.Bet

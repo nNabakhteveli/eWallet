@@ -36,36 +36,24 @@ public class MoneyTransferController : Controller
 
         var createdTransaction = await _transactionsRepository.CreateAsync(transaction);
 
-        
 
-        return Json(new { Success = true, Amount = createdTransaction.Amount ,TransactionId = createdTransaction.Id });
+        return Json(new { Success = true, Amount = createdTransaction.Amount, TransactionId = createdTransaction.Id });
     }
-    
+
     [HttpPost]
     [Route("/Transactions/Api/AcceptDeposit")]
     public async Task<JsonResult> AcceptedDeposit(Deposit transaction)
     {
-        var oldTransaction = await _transactionsRepository.GetTransactionByIdAsync(transaction.TransactionId);
-        
         // imitation of a bank
         var transactionStatus = _bank.ValidateTransfer();
-        oldTransaction.Status = transactionStatus;
-        
-        await _transactionsRepository.UpdateAsync(oldTransaction);
-        
-        var success = false;
-        if (transactionStatus == 1)
-        {
-            success = true;
-            var userWallet = await _walletRepository.GetWalletByUserIdAsync(oldTransaction.UserId);
-        
-            userWallet.CurrentBalance += oldTransaction.Amount;
-            await _walletRepository.UpdateWalletAsync(userWallet);
-        }
-        
-        return Json(new { success });
+
+        await _transactionsRepository.AcceptDeposit(transaction.TransactionId, transactionStatus);
+
+        if (transactionStatus == 1) return Json(new { success = true });
+
+        return Json(new { success = false });
     }
-    
+
     [HttpPost]
     [Route("/Transactions/Api/RejectDeposit")]
     public async Task<JsonResult> RejectDeposit(Deposit transaction)
@@ -74,10 +62,10 @@ public class MoneyTransferController : Controller
 
         oldTransaction.Status = 2;
         await _transactionsRepository.UpdateAsync(oldTransaction);
-        
+
         return Json(new { success = true });
     }
-    
+
 
     [HttpPost]
     [Route("/Transactions/Api/Withdraw")]
@@ -106,11 +94,11 @@ public class MoneyTransferController : Controller
         await _transactionsRepository.UpdateAsync(createdTransaction);
 
         var success = true;
-        
+
         if (transactionStatus == 2)
         {
             success = false;
-            
+
             userWallet.CurrentBalance += transaction.Amount;
             await _walletRepository.UpdateWalletAsync(userWallet);
         }
