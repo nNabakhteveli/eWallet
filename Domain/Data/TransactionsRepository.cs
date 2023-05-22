@@ -25,9 +25,96 @@ public class TransactionsRepository : ITransactionsRepository
 
             SqlCommand cmd = new SqlCommand("AcceptDeposit", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-            
+
             cmd.Parameters.Add(new SqlParameter("@TransactionId", transactionId));
             cmd.Parameters.Add(new SqlParameter("@Status", status));
+
+            try
+            {
+                using (SqlDataReader rdr = cmd.ExecuteReader())
+                {
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+
+    public async Task<AppTransaction> InitialWithdraw(TransactionEntity transaction)
+    {
+        var result = new AppTransaction();
+
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand("InitialWithdraw", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@PaymentType", transaction.PaymentType));
+            cmd.Parameters.Add(new SqlParameter("@UserId", transaction.UserId));
+            cmd.Parameters.Add(new SqlParameter("@Amount", transaction.Amount));
+            cmd.Parameters.Add(new SqlParameter("@Currency", transaction.Currency));
+            cmd.Parameters.Add(new SqlParameter("@CreateDate", transaction.CreateDate));
+
+            try
+            {
+                using (SqlDataReader rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        result.TransactionId = (int)rdr[0];
+
+                        return result;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                result.TransactionId = -1;
+            }
+        }
+
+        return result;
+    }
+
+    public async Task AcceptWithdraw(int transactionId, int status)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand("AcceptWithdraw", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@TransactionId", transactionId));
+            cmd.Parameters.Add(new SqlParameter("@Status", status));
+
+            try
+            {
+                using (SqlDataReader rdr = cmd.ExecuteReader())
+                {
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+        }
+    }
+
+    public async Task RejectWithdraw(int transactionId)
+    {
+        using (SqlConnection conn = new SqlConnection(connectionString))
+        {
+            conn.Open();
+
+            SqlCommand cmd = new SqlCommand("RejectWithdraw", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.Add(new SqlParameter("@TransactionId", transactionId));
 
             try
             {

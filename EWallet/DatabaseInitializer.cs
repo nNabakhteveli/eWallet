@@ -9,9 +9,141 @@ public class DatabaseInitializer
     {
         var db = new SqlConnection(connectionStr);
 
+
         try
         {
-	        db.Query(@"
+            db.Query(@"
+			CREATE PROCEDURE dbo.RejectWithdraw   
+			@TransactionId int
+			AS 
+			BEGIN
+				DECLARE @NewTransactionId int;
+				DECLARE @UserId VARCHAR(200)
+				DECLARE @AmountToAdd DECIMAL(10, 2)
+				DECLARE @IsAlreadyProcessed int
+				
+				SET @IsAlreadyProcessed = 0;
+
+				SELECT @IsAlreadyProcessed = Status, @UserId = UserId, @AmountToAdd = Amount from Transactions WHERE Id = @TransactionId
+				
+				IF @IsAlreadyProcessed = 0
+				BEGIN
+					UPDATE Transactions
+        				SET
+							Status = 2
+						WHERE Id = @TransactionId
+				
+					
+					UPDATE dbo.Wallets
+					SET CurrentBalance = CurrentBalance + @AmountToAdd
+					WHERE UserId = @UserId
+				END
+			END
+			");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+        try
+        {
+            db.Query(@"
+			CREATE PROCEDURE dbo.AcceptWithdraw   
+			@TransactionId int,
+			@Status int
+			AS 
+			BEGIN
+				DECLARE @NewTransactionId int;
+				DECLARE @NewCurrentBalance DECIMAL(10, 2)
+				DECLARE @UserId VARCHAR(200)
+				DECLARE @AmountToAdd DECIMAL(10, 2)
+				DECLARE @IsAlreadyProcessed int
+				
+				SET @IsAlreadyProcessed = 0;
+
+				SELECT @IsAlreadyProcessed = Status, @UserId = UserId, @AmountToAdd = Amount from Transactions WHERE Id = @TransactionId
+				
+				IF @IsAlreadyProcessed = 0
+				BEGIN
+					UPDATE Transactions
+        				SET		
+							Status = @Status
+						WHERE Id = @TransactionId
+				END
+			END
+			");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+        try
+        {
+            db.Query(
+                @"
+					CREATE PROCEDURE dbo.InitialWithdraw
+					@PaymentType varchar(10), 
+					@Amount	DECIMAL(10, 2), 
+					@Currency	varchar(10), 
+					@UserId VARCHAR(200),
+					@CreateDate smalldatetime  
+					AS 
+					BEGIN
+						DECLARE @NewTransactionId int;
+						DECLARE @NewCurrentBalance DECIMAL(10, 2)
+						DECLARE @UserCurrentBalance DECIMAL(10, 2)
+						
+						SELECT @UserCurrentBalance = CurrentBalance FROM Wallets WHERE UserId = @UserId
+						
+						IF @UserCurrentBalance > @Amount
+							BEGIN
+								INSERT INTO dbo.Transactions
+							    ([UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status])
+								VALUES
+							        (@UserId, 
+							        @PaymentType, 
+							        @Amount,
+							        @Currency,
+									@CreateDate,
+									0)
+								SET @NewTransactionId = SCOPE_IDENTITY()
+							
+							   
+								UPDATE dbo.Wallets
+								SET CurrentBalance = CurrentBalance - @Amount
+								WHERE UserId = @UserId
+										
+								SELECT @NewTransactionId
+							END
+						ELSE
+							BEGIN
+								INSERT INTO dbo.Transactions
+							    ([UserId], [PaymentType], [Amount], [Currency], [CreateDate], [Status])
+								VALUES
+							        (@UserId, 
+							        @PaymentType, 
+							        @Amount,
+							        @Currency,
+									@CreateDate,
+									2)
+								SET @NewTransactionId = SCOPE_IDENTITY()
+							END
+						
+					END"
+            );
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+
+
+        try
+        {
+            db.Query(@"
 				CREATE PROCEDURE dbo.AcceptDeposit   
 				@TransactionId int,
 				@Status int
@@ -53,9 +185,9 @@ public class DatabaseInitializer
         }
         catch (Exception e)
         {
-	        Console.WriteLine(e);
+            Console.WriteLine(e);
         }
-        
+
         try
         {
             db.Query(

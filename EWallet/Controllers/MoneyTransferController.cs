@@ -1,7 +1,6 @@
 using EBank;
 using EWallet.Domain.Data;
 using EWallet.Domain.Models;
-using EWallet.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EWallet.Controllers;
@@ -9,14 +8,12 @@ namespace EWallet.Controllers;
 public class MoneyTransferController : Controller
 {
     private readonly ITransactionsRepository _transactionsRepository;
-    private readonly IWalletRepository _walletRepository;
     private readonly IEBank _bank;
 
-    public MoneyTransferController(ITransactionsRepository transactionsRepository, IWalletRepository walletRepository,
+    public MoneyTransferController(ITransactionsRepository transactionsRepository,
         IEBank bank)
     {
         _transactionsRepository = transactionsRepository;
-        _walletRepository = walletRepository;
         _bank = bank;
     }
 
@@ -42,7 +39,7 @@ public class MoneyTransferController : Controller
 
     [HttpPost]
     [Route("/Transactions/Api/AcceptDeposit")]
-    public async Task<JsonResult> AcceptedDeposit(Deposit transaction)
+    public async Task<JsonResult> AcceptedDeposit(AppTransaction transaction)
     {
         // imitation of a bank
         var transactionStatus = _bank.ValidateTransfer();
@@ -56,7 +53,7 @@ public class MoneyTransferController : Controller
 
     [HttpPost]
     [Route("/Transactions/Api/RejectDeposit")]
-    public async Task<JsonResult> RejectDeposit(Deposit transaction)
+    public async Task<JsonResult> RejectDeposit(AppTransaction transaction)
     {
         var oldTransaction = await _transactionsRepository.GetTransactionByIdAsync(transaction.TransactionId);
 
@@ -66,43 +63,54 @@ public class MoneyTransferController : Controller
         return Json(new { success = true });
     }
 
-
     [HttpPost]
     [Route("/Transactions/Api/Withdraw")]
     public async Task<JsonResult> Withdraw(TransactionEntity transaction)
     {
-        var userWallet = await _walletRepository.GetWalletByUserIdAsync(transaction.UserId);
-        transaction.CreateDate = DateTime.Now;
-
-        if (!ModelState.IsValid || transaction.Amount > userWallet.CurrentBalance)
+        try
         {
-            transaction.Status = 2;
-
-            await _transactionsRepository.CreateAsync(transaction);
-            return Json(new { success = false });
+            transaction.CreateDate = DateTime.Now;
+            
+            var result = await _transactionsRepository.InitialWithdraw(transaction);
+            return Json(new
+                { Success = true, Amount = transaction.Amount, TransactionId = result.TransactionId });
         }
-
-        var createdTransaction = await _transactionsRepository.CreateAsync(transaction);
-
-        userWallet.CurrentBalance -= transaction.Amount;
-
-        await _walletRepository.UpdateWalletAsync(userWallet);
-
-        var transactionStatus = _bank.ValidateTransfer();
-        createdTransaction.Status = transactionStatus;
-
-        await _transactionsRepository.UpdateAsync(createdTransaction);
-
-        var success = true;
-
-        if (transactionStatus == 2)
+        catch (Exception e)
         {
-            success = false;
-
-            userWallet.CurrentBalance += transaction.Amount;
-            await _walletRepository.UpdateWalletAsync(userWallet);
+            return Json(new { Success = false });
         }
+    }
 
-        return Json(new { success });
+    [HttpPost]
+    [Route("/Transactions/Api/AcceptWithdraw")]
+    public async Task<JsonResult> AcceptWithdraw(AppTransaction transaction)
+    {
+        try
+        {
+            var transactionStatus = _bank.ValidateTransfer();
+
+            if (transactionStatus == 1)
+            {
+                await _transactionsRepository.AcceptWithdraw(transaction.TransactionId, transactionStatus);
+                return Json(new { Success = true });
+            }
+
+            // If transaction got denied by bank
+            await _transactionsRepository.RejectWithdraw(transaction.TransactionId);
+            return Json(new { Success = false });
+        }
+        catch (Exception e)
+        {
+            return Json(new { Success = false });
+        }
+    }
+
+    [HttpPost]
+    [Route("/Transactions/Api/RejectWithdraw")]
+    public async Task<JsonResult> RejectWithdraw(AppTransaction transaction)
+    {
+        await _transactionsRepository.RejectWithdraw(transaction.TransactionId);
+
+        return Json(new { Success = false });
     }
 }

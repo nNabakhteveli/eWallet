@@ -74,7 +74,7 @@ $(document).ready(() => {
             url: '/transactions/api/deposit',
             data: transaction,
             success: data => {
-                window.location.href = `https://localhost:7106/?amount=${data.amount}&transactionId=${data.transactionId}`;
+                window.location.href = `https://localhost:7106/?amount=${data.amount}&transactionId=${data.transactionId}&type=deposit`;
             }
         });
     });

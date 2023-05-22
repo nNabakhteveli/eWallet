@@ -10,4 +10,7 @@ public interface ITransactionsRepository
     Task<IEnumerable<TransactionEntity>> GetAllAsync();
     Task<TransactionEntity> GetTransactionByIdAsync(int id);
     Task AcceptDeposit(int transactionId, int status);
+    Task<AppTransaction> InitialWithdraw(TransactionEntity transaction);
+    Task AcceptWithdraw(int transactionId, int status);
+    Task RejectWithdraw(int transactionId);
 }
