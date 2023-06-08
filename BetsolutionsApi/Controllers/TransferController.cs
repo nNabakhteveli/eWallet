@@ -25,8 +25,8 @@ public class TransferController : ControllerBase
     [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> Deposit([FromForm] TransferRequest req)
     {
-        // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
-        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
+        var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
+        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
 
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
         var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
@@ -68,9 +68,9 @@ public class TransferController : ControllerBase
     [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> Withdraw([FromForm] TransferRequest req)
     {
-        // var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
-        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
-        
+        var rawHash = $"{req.Amount}|{req.Currency}|{req.MerchantId}|{req.TransactionId}|{req.Token}|{req.UserId}|{req.Key}";
+        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
+
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
         var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
         var statusCode = ApiHelper.DetermineRequestStatusCode(req, userToken, userWallet);
@@ -110,9 +110,9 @@ public class TransferController : ControllerBase
     [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> GetBalance([FromForm] TransferRequest req)
     {
-        // var rawHash = $"{req.Currency}|{req.MerchantId}|{req.Token}|{req.UserId}|{req.Key}";
-        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
-        
+        var rawHash = $"{req.Currency}|{req.MerchantId}|{req.Token}|{req.UserId}|{req.Key}";
+        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
+
         var userWallet = await _walletRepository.GetWalletByUserIdAsync(req.UserId);
         var userToken = await _tokenRepository.GetByPrivateToken(req.Token);
 

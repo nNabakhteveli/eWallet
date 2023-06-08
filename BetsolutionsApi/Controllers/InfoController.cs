@@ -21,9 +21,9 @@ public class InfoController : ControllerBase
     [Consumes("application/x-www-form-urlencoded")]
     public async Task<IActionResult> GetPlayerInfo([FromForm] GetPlayerInfoRequest req)
     {
-        // var rawHash = $"{req.MerchantToken}|{req.PrivateToken}";
-        //
-        // if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
+        var rawHash = $"{req.MerchantToken}|{req.PrivateToken}";
+
+        if (req.Hash != ApiHelper.GetSha256(rawHash)) return StatusCode(403, CustomHttpResponses.InvalidHash403);
         try
         {
             var tokenData = await _tokenRepository.GetByPrivateToken(req.PrivateToken);
